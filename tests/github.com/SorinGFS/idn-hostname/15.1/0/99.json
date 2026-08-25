@@ -1,0 +1,5 @@
+{
+    "description": "invalid because U+00BC VULGAR FRACTION ONE QUARTER maps through IDNA-invalid U+2044 FRACTION SLASH",
+    "data": "¼",
+    "valid": false
+}
