@@ -1,5 +1,5 @@
 
-URI Template Tests
+URI Template Tests .
 ==================
 
 This is a set of tests for implementations of
