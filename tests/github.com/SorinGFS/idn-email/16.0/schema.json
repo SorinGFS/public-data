@@ -1,0 +1,4 @@
+{
+    "description": "Unicode 16.0-specific internationalized email cases delegated to idn-hostname",
+    "$ref": "#/#/#/idn-email"
+}

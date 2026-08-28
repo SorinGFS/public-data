@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+A7CE LATIN CAPITAL LETTER PHARYNGEAL VOICED FRICATIVE mapped to U+A7CF",
+    "data": "a@\uA7CE",
+    "valid": true
+}

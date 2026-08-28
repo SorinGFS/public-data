@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+A7F1 MODIFIER LETTER CAPITAL S mapped to ASCII s",
+    "data": "a@\uA7F1",
+    "valid": true
+}

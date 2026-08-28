@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+1CCD6 OUTLINED LATIN CAPITAL LETTER A mapped to ASCII a",
+    "data": "a@\uD833\uDCD6",
+    "valid": true
+}
