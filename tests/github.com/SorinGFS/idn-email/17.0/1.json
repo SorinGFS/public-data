@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+0C5C TELUGU ARCHAIC SHRII",
+    "data": "a@\u0C5C",
+    "valid": true
+}

@@ -1,0 +1,5 @@
+{
+    "description": "invalid email hostname ZWNJ context after U+1171E AHOM CONSONANT SIGN MEDIAL RA changed from Joining_Type T to U",
+    "data": "a@\u0628\uD805\uDF1E\u200C\u0628",
+    "valid": false
+}

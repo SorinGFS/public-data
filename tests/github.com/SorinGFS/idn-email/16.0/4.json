@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with ZERO WIDTH JOINER preceded by newly assigned U+113CE TULU-TIGALARI SIGN VIRAMA",
+    "data": "a@\uD804\uDF80\uD804\uDFCE\u200D\uD804\uDF80",
+    "valid": true
+}

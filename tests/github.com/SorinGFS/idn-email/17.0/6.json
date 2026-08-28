@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+1ACF COMBINING DOUBLE CARON after an ASCII letter",
+    "data": "a@a\u1ACF",
+    "valid": true
+}

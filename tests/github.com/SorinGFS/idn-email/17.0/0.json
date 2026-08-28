@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with newly assigned U+088F ARABIC LETTER NOON WITH RING ABOVE",
+    "data": "a@\u088F",
+    "valid": true
+}

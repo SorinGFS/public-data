@@ -1,0 +1,5 @@
+{
+    "description": "invalid email hostname label beginning with newly assigned U+1ACF COMBINING DOUBLE CARON",
+    "data": "a@\u1ACF",
+    "valid": false
+}

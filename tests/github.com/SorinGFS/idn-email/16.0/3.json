@@ -1,0 +1,5 @@
+{
+    "description": "valid email hostname with U+180E MONGOLIAN VOWEL SEPARATOR ignored between a and b",
+    "data": "a@a\u180Eb",
+    "valid": true
+}
