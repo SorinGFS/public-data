@@ -1,0 +1,5 @@
+{
+    "description": "valid hostname with a 63-character ASCII label",
+    "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "valid": true
+}

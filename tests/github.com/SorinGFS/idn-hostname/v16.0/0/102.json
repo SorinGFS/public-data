@@ -1,0 +1,5 @@
+{
+    "description": "GREEK KERAIA followed immediately by Greek remains valid when more characters follow",
+    "data": "α͵βγ",
+    "valid": true
+}

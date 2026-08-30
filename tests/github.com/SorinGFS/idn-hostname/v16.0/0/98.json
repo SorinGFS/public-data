@@ -1,0 +1,5 @@
+{
+    "description": "invalid because U+00A0 NO-BREAK SPACE maps to an IDNA-invalid U+0020 SPACE",
+    "data": "a b",
+    "valid": false
+}

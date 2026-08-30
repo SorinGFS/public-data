@@ -1,5 +1,5 @@
 {
-    "description": "valid newly assigned U+0C5C TELUGU ARCHAIC SHRII",
-    "data": "\u0C5C",
+    "description": "valid hostname with mixed scripts",
+    "data": "xn--fsqu00a.xn--0zwm56d",
     "valid": true
 }
