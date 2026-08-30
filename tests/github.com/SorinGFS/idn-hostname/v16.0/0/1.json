@@ -1,5 +1,5 @@
 {
-    "description": "valid newly assigned U+1C89 CYRILLIC CAPITAL LETTER TJE mapped to U+1C8A",
-    "data": "\u1C89",
+    "description": "valid hostname with mixed scripts",
+    "data": "xn--fsqu00a.xn--0zwm56d",
     "valid": true
 }

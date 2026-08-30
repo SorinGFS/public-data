@@ -1,0 +1,5 @@
+{
+    "description": "valid newly assigned U+1ACF COMBINING DOUBLE CARON after an ASCII letter",
+    "data": "a\u1ACF",
+    "valid": true
+}

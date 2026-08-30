@@ -1,4 +1,4 @@
 {
-    "description": "Unicode 17.0-specific internationalized hostname cases",
+    "description": "Unicode 17.0 internationalized hostname regression and version-specific cases",
     "$ref": "#/#/#/idn-hostname"
 }

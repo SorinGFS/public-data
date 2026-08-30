@@ -1,0 +1,5 @@
+{
+    "description": "valid mixed-case ASCII hostname with digits and an internal hyphen",
+    "data": "A1-b.Example",
+    "valid": true
+}

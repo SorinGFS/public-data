@@ -1,5 +1,5 @@
 {
-    "description": "valid newly assigned U+A7CE LATIN CAPITAL LETTER PHARYNGEAL VOICED FRICATIVE mapped to U+A7CF",
-    "data": "\uA7CE",
+    "description": "valid hostname with alphanumeric characters and hyphens",
+    "data": "sub-example.example.com",
     "valid": true
 }

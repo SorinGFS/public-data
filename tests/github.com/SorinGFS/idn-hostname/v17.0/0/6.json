@@ -1,5 +1,5 @@
 {
-    "description": "valid newly assigned U+1ACF COMBINING DOUBLE CARON after an ASCII letter",
-    "data": "a\u1ACF",
-    "valid": true
+    "description": "invalid hostname starting with hyphen",
+    "data": "-example.com",
+    "valid": false
 }
