@@ -2,7 +2,7 @@
 // Run every downloaded uritemplate-test case against the package root implementation.
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { parseTemplate } = require('../../../index.js');
+const { parseTemplate } = require('../../../../index.js');
 
 const fixtureFiles = [
     'spec-examples.json',
