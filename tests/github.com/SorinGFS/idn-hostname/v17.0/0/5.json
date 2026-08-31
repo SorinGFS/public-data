@@ -1,5 +1,5 @@
 {
-    "description": "invalid hostname with space",
-    "data": "ex ample.com",
+    "description": "invalid label beginning with newly assigned U+1ACF COMBINING DOUBLE CARON",
+    "data": "\u1ACF",
     "valid": false
 }

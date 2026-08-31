@@ -1,6 +1,6 @@
 # Public test layout
 
-This directory is the single entry point for the materialized public test suite. It retains package fixtures in version-specific layers and registers only the layers eligible for the tested package version. The numeric collections are cumulative: `v15.1` contains 108 fixtures, `v16.0` carries those fixtures followed by seven Unicode 16 additions, and `v17.0` carries those 115 fixtures followed by seven Unicode 17 additions. For `idn-hostname@17.0.1`, those 122 package fixtures and 6,202 applicable Unicode 17.0.0 `IdnaTestV2.txt` vectors are active. Run it through the package command:
+This directory is the single entry point for the materialized public test suite. It retains package fixtures as version-specific deltas and registers only the layers eligible for the tested package version. Because `index.json` declares the selected callback backwards compatible, `idn-hostname@17.0.1` activates the 108 `v15.1` fixtures, seven `v16.0` additions, seven `v17.0` additions, and 6,202 applicable Unicode 17.0.0 `IdnaTestV2.txt` vectors. Run it through the package command:
 
 ```sh
 npm test
@@ -40,9 +40,9 @@ The Unicode 17.0 concern requires `process.versions.unicode` to be at least `17.
   v15.1/
     0/                       # 108 Unicode 15.1 package fixtures
   v16.0/
-    0/                       # 115 cumulative package fixtures through Unicode 16.0
+    0/                       # 7 Unicode 16.0 additions
   v17.0/
-    0/                       # 122 cumulative package fixtures through Unicode 17.0
+    0/                       # 7 Unicode 17.0 additions
     idna-test-v2/
       index.js
       IdnaTestV2.txt
@@ -60,12 +60,14 @@ The dispatcher reads the package version from `package.json` and processes eligi
 3. `v<major>.<minor>` when both components match;
 4. complete `v<major>.<minor>.<patch>` layers in ascending semantic-version order when they have the same major and are not newer than the package.
 
-For package version `1.2.3`, examples are:
+For package version `1.2.3` with the default exact-scope behavior, examples are:
 
 - eligible: `.`, `v1`, `v1.2`, `v1.0.0`, `v1.1.3`, and `v1.2.3`;
 - ineligible: `v1.1`, `v1.2.4`, `v2`, and every complete `v2` layer.
 
-A complete version layer never crosses its major-version boundary. For a package prerelease or build version, layer eligibility uses its numeric `major.minor.patch` core.
+A complete version layer never crosses its major-version boundary under the default behavior. When `index.json.backwardsCompatible` is `true`, every version layer whose semantic introduction point is not newer than the package becomes eligible across major-version boundaries. Omitted components are treated as zero, so `v15` means `15.0.0` and `v15.1` means `15.1.0`. Compatible layers run in ascending semantic order, with shorter equal versions first: `v17`, `v17.0`, then `v17.0.0`.
+
+For a package prerelease or build version, layer eligibility uses its numeric `major.minor.patch` core.
 
 ## Ordering within a layer
 
@@ -93,7 +95,8 @@ When an eligible numeric directory exists, `#/public/tests/index.json` must sele
 
 ```json
 {
-  "callback": "isIdnHostname"
+  "callback": "isIdnHostname",
+  "backwardsCompatible": true
 }
 ```
 
@@ -101,6 +104,8 @@ The callback contract is:
 
 - for `"valid": true`, calling the function with `data` must return `true` without throwing;
 - for `"valid": false`, calling the function with `data` must throw.
+
+`backwardsCompatible` is optional and defaults to `false`. It must be a boolean. Set it to `true` only when older valid/invalid callback expectations remain applicable to newer package versions; this allows each version folder to contain only newly introduced fixtures.
 
 The dispatcher verifies the fixture fields and reports the layer, collection, fixture filename, and description in the test name.
 

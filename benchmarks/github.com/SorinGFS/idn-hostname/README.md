@@ -1,6 +1,6 @@
 # Public benchmark layout
 
-This directory is the single entry point for the materialized public benchmark suite. It registers isolated package loading plus four function scenarios across the package's three function exports. Run the complete suite with:
+This directory is the single entry point for the materialized public benchmark suite. It registers isolated package loading plus five function scenarios across the package's three function exports. Run the complete suite with:
 
 ```sh
 npm run benchmark
@@ -58,8 +58,12 @@ A function concern exports a registration function:
 
 ```js
 'use strict';
-// Register validated internationalized-to-ACE conversion measurements.
+// Register pass-through ASCII and internationalized-to-ACE conversion measurements.
 module.exports = (_subject, { benchmark }) => {
+    benchmark({
+        callback: 'idnHostname',
+        args: ['www.example.com'],
+    });
     benchmark({
         callback: 'idnHostname',
         args: ['mañana.example'],

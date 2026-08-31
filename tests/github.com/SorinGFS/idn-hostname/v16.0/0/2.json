@@ -1,5 +1,5 @@
 {
-    "description": "valid hostname with alphanumeric characters and hyphens",
-    "data": "sub-example.example.com",
+    "description": "valid newly assigned U+1CCD6 OUTLINED LATIN CAPITAL LETTER A mapped to ASCII a",
+    "data": "\uD833\uDCD6",
     "valid": true
 }

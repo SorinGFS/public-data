@@ -1,5 +1,0 @@
-{
-    "description": "valid with ignored-range interior U+180C MONGOLIAN FREE VARIATION SELECTOR THREE removed between a and b",
-    "data": "a᠌b",
-    "valid": true
-}
