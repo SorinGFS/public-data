@@ -26,7 +26,16 @@ const layerSets = discoverVersionLayerSets(testsRoot, packageMetadata.version);
 const fixtureLayers = selectVersionLayers(layerSets, {
     backwardsCompatible: configuration.backwardsCompatible ?? false,
 });
-const fixtures = discoverNumberedJsonFixtures(fixtureLayers);
+const fixturesByLayer = new Map(fixtureLayers.map((layer) => [layer.name, []]));
+const concernsByLayer = new Map(layerSets.exact.map((layer) => [layer.name, []]));
+
+// Group ordered descriptors without repeating filesystem traversal in the dispatcher.
+for (const descriptor of discoverNumberedJsonFixtures(fixtureLayers)) {
+    fixturesByLayer.get(descriptor.layer).push(descriptor);
+}
+for (const descriptor of discoverConcernEntryPoints(layerSets.exact)) {
+    concernsByLayer.get(descriptor.layer).push(descriptor);
+}
 let fixtureCallback;
 
 // Resolve the configured package callback only when numeric fixtures require it.
@@ -40,24 +49,27 @@ const getFixtureCallback = () => {
     return fixtureCallback;
 };
 
-// Register every selected numbered fixture independently through the configured package callback.
-for (const descriptor of fixtures) {
-    const fixture = JSON.parse(fs.readFileSync(descriptor.path, 'utf8'));
-    const description = typeof fixture.description === 'string' ? fixture.description : 'invalid fixture description';
-    const label = `${descriptor.id} / ${description}`;
-    const callback = getFixtureCallback();
-    test(label, () => {
-        assert.equal(typeof fixture.description, 'string', `${descriptor.id} must have a description.`);
-        assert.ok(Object.hasOwn(fixture, 'data'), `${descriptor.id} must have data.`);
-        assert.equal(typeof fixture.valid, 'boolean', `${descriptor.id} must have a boolean valid result.`);
-        if (fixture.valid) assert.equal(callback(fixture.data), true, label);
-        else assert.throws(() => callback(fixture.data), undefined, label);
-    });
-}
+// Preserve semantic layer order, registering numeric fixtures before explicit concerns within each layer.
+for (const layer of fixtureLayers) {
+    // Register every selected numbered fixture independently through the configured package callback.
+    for (const descriptor of fixturesByLayer.get(layer.name)) {
+        const fixture = JSON.parse(fs.readFileSync(descriptor.path, 'utf8'));
+        const description = typeof fixture.description === 'string' ? fixture.description : 'invalid fixture description';
+        const label = `${descriptor.id} / ${description}`;
+        const callback = getFixtureCallback();
+        test(label, () => {
+            assert.equal(typeof fixture.description, 'string', `${descriptor.id} must have a description.`);
+            assert.ok(Object.hasOwn(fixture, 'data'), `${descriptor.id} must have data.`);
+            assert.equal(typeof fixture.valid, 'boolean', `${descriptor.id} must have a boolean valid result.`);
+            if (fixture.valid) assert.equal(callback(fixture.data), true, label);
+            else assert.throws(() => callback(fixture.data), undefined, label);
+        });
+    }
 
-// Keep explicit concern suites on exact-scope semantics because compatibility describes only the fixture callback.
-for (const concern of discoverConcernEntryPoints(layerSets.exact)) {
-    const register = require(concern.entryPoint);
-    assert.equal(typeof register, 'function', `${path.relative(testsRoot, concern.entryPoint)} must export a registration function.`);
-    register(subject, { layer: concern.layer, packageRoot, testsRoot });
+    // Keep explicit concerns on exact scope because compatibility describes only the fixture callback.
+    for (const concern of concernsByLayer.get(layer.name) ?? []) {
+        const register = require(concern.entryPoint);
+        assert.equal(typeof register, 'function', `${path.relative(testsRoot, concern.entryPoint)} must export a registration function.`);
+        register(subject, { layer: concern.layer, packageRoot, testsRoot });
+    }
 }
