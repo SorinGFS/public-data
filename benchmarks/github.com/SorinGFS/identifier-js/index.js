@@ -5,7 +5,11 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { compareNames, discoverVersionLayers, readDirectories, versionPattern } = require('../../version-layers.js');
+const {
+    discoverConcernEntryPoints,
+    discoverVersionLayerSets,
+    selectVersionLayers,
+} = require('../../version-layers.js');
 
 const benchmarksRoot = __dirname;
 const packageRoot = path.resolve(benchmarksRoot, '../../..');
@@ -117,56 +121,59 @@ const summarize = (values) => ({
 
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 const subject = require(packageRoot);
+const configurationPath = path.join(benchmarksRoot, 'index.json');
+const configuration = fs.existsSync(configurationPath)
+    ? JSON.parse(fs.readFileSync(configurationPath, 'utf8'))
+    : {};
+if (Object.hasOwn(configuration, 'backwardsCompatible')) {
+    assert.equal(typeof configuration.backwardsCompatible, 'boolean', 'index.json.backwardsCompatible must be a boolean.');
+}
 const registrations = [];
-const layers = discoverVersionLayers(benchmarksRoot, packageMetadata.version);
+const layerSets = discoverVersionLayerSets(benchmarksRoot, packageMetadata.version);
+const layers = selectVersionLayers(layerSets, {
+    backwardsCompatible: configuration.backwardsCompatible ?? false,
+});
+const concerns = discoverConcernEntryPoints(layers);
 
-// Register benchmark descriptors from explicit concern entry points in each eligible layer.
-for (const layer of layers) {
-    const concerns = readDirectories(layer.root)
-        .filter((entry) => !versionPattern.test(entry.name))
-        .filter((entry) => fs.existsSync(path.join(layer.root, entry.name, 'index.js')))
-        .sort(compareNames);
-
-    // Supply each concern with package APIs and centralized measurement registration.
-    for (const concern of concerns) {
-        const concernId = layer.name === '.' ? concern.name : `${layer.name}/${concern.name}`;
-        const register = require(path.join(layer.root, concern.name, 'index.js'));
-        assert.equal(typeof register, 'function', `${concernId}/index.js must export a registration function.`);
-        // Validate and retain one package-function measurement identified by its actual arguments.
-        const benchmark = (options) => {
-            assert.ok(options && typeof options === 'object', `${concernId} must supply benchmark options.`);
-            const callback = options.callback;
-            assert.equal(typeof callback, 'string', `${concernId} must select a callback.`);
-            assert.equal(typeof subject[callback], 'function', `Package export ${JSON.stringify(callback)} is not a function.`);
-            assert.ok(Array.isArray(options.args), `${concernId} args must be an array.`);
-            const serializedArgs = JSON.stringify(options.args);
-            assert.notEqual(serializedArgs, undefined, `${concernId} args must be JSON-serializable.`);
-            assert.deepEqual(JSON.parse(serializedArgs), options.args, `${concernId} args must preserve their values through JSON.`);
-            const benchmarkId = `${concernId} / ${serializedArgs}`;
-            registrations.push({
-                type: 'function',
-                id: benchmarkId,
-                callback,
-                args: options.args,
-                initialCalls: defaults.initialCalls,
-                warmup: validateCount(options.warmup ?? defaults.warmup, `${benchmarkId} warmup`),
-                iterations: defaults.iterations,
-                samples: validateCount(options.samples ?? defaults.samples, `${benchmarkId} samples`),
-            });
-        };
-        // Validate and retain one isolated package-load measurement.
-        const benchmarkLoad = (name, options = {}) => {
-            assert.equal(typeof name, 'string', `${concernId} benchmark-load names must be strings.`);
-            assert.ok(name.length > 0, `${concernId} benchmark-load names must not be empty.`);
-            assert.ok(options && typeof options === 'object', `${concernId}/${name} must supply benchmark-load options.`);
-            registrations.push({
-                type: 'load',
-                id: `${concernId} / ${name}`,
-                samples: validateCount(options.samples ?? defaults.loadSamples, `${concernId}/${name} samples`),
-            });
-        };
-        register(subject, { benchmark, benchmarkLoad, layer: layer.name, packageRoot, benchmarksRoot });
-    }
+// Supply every selected concern with package APIs and centralized measurement registration.
+for (const concern of concerns) {
+    const concernId = concern.id;
+    const register = require(concern.entryPoint);
+    assert.equal(typeof register, 'function', `${concernId}/index.js must export a registration function.`);
+    // Validate and retain one package-function measurement identified by its actual arguments.
+    const benchmark = (options) => {
+        assert.ok(options && typeof options === 'object', `${concernId} must supply benchmark options.`);
+        const callback = options.callback;
+        assert.equal(typeof callback, 'string', `${concernId} must select a callback.`);
+        assert.equal(typeof subject[callback], 'function', `Package export ${JSON.stringify(callback)} is not a function.`);
+        assert.ok(Array.isArray(options.args), `${concernId} args must be an array.`);
+        const serializedArgs = JSON.stringify(options.args);
+        assert.notEqual(serializedArgs, undefined, `${concernId} args must be JSON-serializable.`);
+        assert.deepEqual(JSON.parse(serializedArgs), options.args, `${concernId} args must preserve their values through JSON.`);
+        const benchmarkId = `${concernId} / ${serializedArgs}`;
+        registrations.push({
+            type: 'function',
+            id: benchmarkId,
+            callback,
+            args: options.args,
+            initialCalls: defaults.initialCalls,
+            warmup: validateCount(options.warmup ?? defaults.warmup, `${benchmarkId} warmup`),
+            iterations: defaults.iterations,
+            samples: validateCount(options.samples ?? defaults.samples, `${benchmarkId} samples`),
+        });
+    };
+    // Validate and retain one isolated package-load measurement.
+    const benchmarkLoad = (name, options = {}) => {
+        assert.equal(typeof name, 'string', `${concernId} benchmark-load names must be strings.`);
+        assert.ok(name.length > 0, `${concernId} benchmark-load names must not be empty.`);
+        assert.ok(options && typeof options === 'object', `${concernId}/${name} must supply benchmark-load options.`);
+        registrations.push({
+            type: 'load',
+            id: `${concernId} / ${name}`,
+            samples: validateCount(options.samples ?? defaults.loadSamples, `${concernId}/${name} samples`),
+        });
+    };
+    register(subject, { benchmark, benchmarkLoad, layer: concern.layer, packageRoot, benchmarksRoot });
 }
 assert.ok(registrations.length > 0, 'No benchmarks were registered.');
 assert.equal(new Set(registrations.map((registration) => registration.id)).size, registrations.length, 'Benchmark identifiers must be unique.');
