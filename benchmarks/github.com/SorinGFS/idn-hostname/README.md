@@ -22,7 +22,7 @@ Add `--json` to emit a machine-readable report suitable for a CI artifact.
 
 ## Portability and version layers
 
-The benchmark structure is intended to be portable across projects and CI runners. It uses explicit concern entry points, package API injection, Node path APIs, deterministic discovery, and no external benchmark runner. The dispatcher imports the extension-managed `#/version-layers.js` helper so public and private tools share one version-selection implementation.
+The benchmark structure is intended to be portable across projects and CI runners. It uses explicit concern entry points, package API injection, Node path APIs, deterministic discovery, and no external benchmark runner. The dispatcher delegates exact or cumulative layer selection and ordered concern discovery to the extension-managed `#/version-layers.js` v0.5 runtime.
 
 Benchmark layers use the shared version-layer contract. By default, discovery processes:
 
