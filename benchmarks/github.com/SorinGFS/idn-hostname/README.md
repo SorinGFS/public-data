@@ -24,12 +24,14 @@ Add `--json` to emit a machine-readable report suitable for a CI artifact.
 
 The benchmark structure is intended to be portable across projects and CI runners. It uses explicit concern entry points, package API injection, Node path APIs, deterministic discovery, and no external benchmark runner. The dispatcher imports the extension-managed `#/version-layers.js` helper so public and private tools share one version-selection implementation.
 
-Benchmark layers follow the same eligibility and ordering contract as public tests:
+Benchmark layers use the shared version-layer contract. By default, discovery processes:
 
 1. `.` always;
 2. matching `v<major>`;
 3. matching `v<major>.<minor>`;
 4. eligible complete versions in ascending order within the package major.
+
+An optional `#/public/benchmarks/index.json` can set `"backwardsCompatible": true`. In that mode, every version layer whose semantic introduction point is not newer than the package is eligible across major boundaries. Omitted components are treated as zero, and layers run in ascending semantic order with shorter equal versions first. The option must be boolean and defaults to `false`.
 
 Within each layer, nonversion concern directories are loaded lexically through `<concern>/index.js`. Loose files are ignored.
 
@@ -40,6 +42,7 @@ Each exported package function owns a concern directory. A concern can add more 
 ```text
 #/public/benchmarks/
   index.js
+  index.json                 # Optional version-layer configuration
   README.md
   _load-time/
     index.js
@@ -72,6 +75,16 @@ module.exports = (_subject, { benchmark }) => {
 ```
 
 The callback must be a named function exported by the package. Arguments must be JSON-serializable so the harness can reproduce first-call measurements in a fresh process. This suite covers the package-owned `isIdnHostname`, `idnHostname`, and `uts46map` functions. The exported `punycode` dependency object is not a package-owned function benchmark.
+
+When older benchmark concerns remain meaningful for newer package versions, enable cumulative discovery without changing the generic coordinator:
+
+```json
+{
+  "backwardsCompatible": true
+}
+```
+
+Version folders can then contain only newly introduced benchmark concerns or scenarios.
 
 A package-load concern uses the dedicated registration function:
 
