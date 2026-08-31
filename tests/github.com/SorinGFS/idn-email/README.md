@@ -10,7 +10,7 @@ The package command invokes `node ./#/public/tests`. Node loads `index.js`, whic
 
 ## Portability and CI use
 
-The dispatcher is shared unchanged with other packages. Each project supplies only its package exports, `index.json` callback selection, numbered fixtures, and optional concern suites. It imports the extension-managed `#/version-layers.js` helper so tests and benchmarks use one deterministic version-selection implementation.
+The dispatcher is shared unchanged with other packages. Each project supplies only its package exports, `index.json` callback selection, numbered fixtures, and optional concern suites. It delegates exact and cumulative layer selection, numbered-fixture traversal, and explicit concern discovery to the extension-managed `#/version-layers.js` v0.5 runtime.
 
 The structure is suitable for local and CI use because it has one package command, deterministic ordering, explicit entry points, package API injection, platform-independent Node paths, and unsuccessful process exits for configuration, loading, or assertion failures.
 

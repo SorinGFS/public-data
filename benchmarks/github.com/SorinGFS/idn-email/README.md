@@ -17,7 +17,7 @@ node ./#/public/benchmarks --quick --json
 
 ## Portability
 
-The coordinator is shared unchanged with other packages. It uses explicit concern entry points, package API injection, Node path APIs, deterministic discovery, and no external benchmark runner. It imports the extension-managed `#/version-layers.js` helper.
+The coordinator is shared unchanged with other packages. It uses explicit concern entry points, package API injection, Node path APIs, deterministic discovery, and no external benchmark runner. It delegates exact or cumulative layer selection and ordered concern discovery to the extension-managed `#/version-layers.js` v0.5 runtime.
 
 ```text
 #/public/benchmarks/
