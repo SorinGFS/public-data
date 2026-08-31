@@ -117,8 +117,17 @@ const summarize = (values) => ({
 
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 const subject = require(packageRoot);
+const configurationPath = path.join(benchmarksRoot, 'index.json');
+const configuration = fs.existsSync(configurationPath)
+    ? JSON.parse(fs.readFileSync(configurationPath, 'utf8'))
+    : {};
+if (Object.hasOwn(configuration, 'backwardsCompatible')) {
+    assert.equal(typeof configuration.backwardsCompatible, 'boolean', 'index.json.backwardsCompatible must be a boolean.');
+}
 const registrations = [];
-const layers = discoverVersionLayers(benchmarksRoot, packageMetadata.version);
+const layers = discoverVersionLayers(benchmarksRoot, packageMetadata.version, {
+    backwardsCompatible: configuration.backwardsCompatible ?? false,
+});
 
 // Register benchmark descriptors from explicit concern entry points in each eligible layer.
 for (const layer of layers) {
