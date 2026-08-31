@@ -10,15 +10,22 @@ const testsRoot = __dirname;
 const packageRoot = path.resolve(testsRoot, '../../..');
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 const subject = require(packageRoot);
-const layers = discoverVersionLayers(testsRoot, packageMetadata.version);
+const configurationPath = path.join(testsRoot, 'index.json');
+const configuration = fs.existsSync(configurationPath)
+    ? JSON.parse(fs.readFileSync(configurationPath, 'utf8'))
+    : {};
+if (Object.hasOwn(configuration, 'backwardsCompatible')) {
+    assert.equal(typeof configuration.backwardsCompatible, 'boolean', 'index.json.backwardsCompatible must be a boolean.');
+}
+const layers = discoverVersionLayers(testsRoot, packageMetadata.version, {
+    backwardsCompatible: configuration.backwardsCompatible ?? false,
+});
 let fixtureCallback;
 
 // Resolve the configured package callback only when numeric fixtures require it.
 const getFixtureCallback = () => {
     if (fixtureCallback) return fixtureCallback;
-    const configurationPath = path.join(testsRoot, 'index.json');
     assert.ok(fs.existsSync(configurationPath), 'Numeric fixtures require #/public/tests/index.json.');
-    const configuration = JSON.parse(fs.readFileSync(configurationPath, 'utf8'));
     assert.equal(typeof configuration.callback, 'string', 'index.json.callback must be a string.');
     assert.ok(configuration.callback.length > 0, 'index.json.callback must not be empty.');
     assert.equal(typeof subject[configuration.callback], 'function', `Package export ${JSON.stringify(configuration.callback)} is not a function.`);

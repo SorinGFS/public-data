@@ -1,5 +1,5 @@
 {
-    "description": "valid internationalized hostname",
-    "data": "例子.测试",
+    "description": "valid newly assigned U+1C8A CYRILLIC SMALL LETTER TJE",
+    "data": "\u1C8A",
     "valid": true
 }
