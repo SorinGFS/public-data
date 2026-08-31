@@ -20,6 +20,7 @@ if (Object.hasOwn(configuration, 'backwardsCompatible')) {
 const layers = discoverVersionLayers(testsRoot, packageMetadata.version, {
     backwardsCompatible: configuration.backwardsCompatible ?? false,
 });
+const suiteLayers = new Set(discoverVersionLayers(testsRoot, packageMetadata.version).map((layer) => layer.name));
 let fixtureCallback;
 
 // Resolve the configured package callback only when numeric fixtures require it.
@@ -66,16 +67,19 @@ for (const layer of layers) {
         }
     }
 
-    const concernDirectories = directories
-        .filter((entry) => !/^\d+$/.test(entry.name) && !versionPattern.test(entry.name))
-        .filter((entry) => fs.existsSync(path.join(layer.root, entry.name, 'index.js')))
-        .sort(compareNames);
+    // Keep explicit concern suites on exact-scope semantics because compatibility describes only the fixture callback.
+    if (suiteLayers.has(layer.name)) {
+        const concernDirectories = directories
+            .filter((entry) => !/^\d+$/.test(entry.name) && !versionPattern.test(entry.name))
+            .filter((entry) => fs.existsSync(path.join(layer.root, entry.name, 'index.js')))
+            .sort(compareNames);
 
-    // Load explicit suite entry points after numeric fixtures and pass the package API to each registrar.
-    for (const concern of concernDirectories) {
-        const suitePath = path.join(layer.root, concern.name, 'index.js');
-        const register = require(suitePath);
-        assert.equal(typeof register, 'function', `${path.relative(testsRoot, suitePath)} must export a registration function.`);
-        register(subject, { layer: layer.name, packageRoot, testsRoot });
+        // Load explicit suite entry points after numeric fixtures and pass the package API to each registrar.
+        for (const concern of concernDirectories) {
+            const suitePath = path.join(layer.root, concern.name, 'index.js');
+            const register = require(suitePath);
+            assert.equal(typeof register, 'function', `${path.relative(testsRoot, suitePath)} must export a registration function.`);
+            register(subject, { layer: layer.name, packageRoot, testsRoot });
+        }
     }
 }

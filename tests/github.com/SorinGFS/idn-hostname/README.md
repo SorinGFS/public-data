@@ -39,11 +39,13 @@ The Unicode 17.0 concern requires `process.versions.unicode` to be at least `17.
   index.json
   v15.1/
     0/                       # 108 Unicode 15.1 package fixtures
+    idna-test-v2/            # Unicode 15.1 conformance concern
   v16.0/
     0/                       # 7 Unicode 16.0 additions
+    idna-test-v2/            # Unicode 16.0 conformance concern
   v17.0/
     0/                       # 7 Unicode 17.0 additions
-    idna-test-v2/
+    idna-test-v2/            # Unicode 17.0 conformance concern
       index.js
       IdnaTestV2.txt
       IdnaMappingTable.txt
@@ -65,7 +67,7 @@ For package version `1.2.3` with the default exact-scope behavior, examples are:
 - eligible: `.`, `v1`, `v1.2`, `v1.0.0`, `v1.1.3`, and `v1.2.3`;
 - ineligible: `v1.1`, `v1.2.4`, `v2`, and every complete `v2` layer.
 
-A complete version layer never crosses its major-version boundary under the default behavior. When `index.json.backwardsCompatible` is `true`, every version layer whose semantic introduction point is not newer than the package becomes eligible across major-version boundaries. Omitted components are treated as zero, so `v15` means `15.0.0` and `v15.1` means `15.1.0`. Compatible layers run in ascending semantic order, with shorter equal versions first: `v17`, `v17.0`, then `v17.0.0`.
+A complete version layer never crosses its major-version boundary under the default behavior. When `index.json.backwardsCompatible` is `true`, numeric fixture directories from every version layer whose semantic introduction point is not newer than the package become eligible across major-version boundaries. Omitted components are treated as zero, so `v15` means `15.0.0` and `v15.1` means `15.1.0`. Compatible layers run in ascending semantic order, with shorter equal versions first: `v17`, `v17.0`, then `v17.0.0`.
 
 For a package prerelease or build version, layer eligibility uses its numeric `major.minor.patch` core.
 
@@ -105,7 +107,7 @@ The callback contract is:
 - for `"valid": true`, calling the function with `data` must return `true` without throwing;
 - for `"valid": false`, calling the function with `data` must throw.
 
-`backwardsCompatible` is optional and defaults to `false`. It must be a boolean. Set it to `true` only when older valid/invalid callback expectations remain applicable to newer package versions; this allows each version folder to contain only newly introduced fixtures.
+`backwardsCompatible` is optional and defaults to `false`. It must be a boolean. Set it to `true` only when older valid/invalid callback expectations remain applicable to newer package versions; this allows each version folder to contain only newly introduced numeric fixtures. The setting applies only to numeric fixtures executed through the selected callback, not to explicit concern suites.
 
 The dispatcher verifies the fixture fields and reports the layer, collection, fixture filename, and description in the test name.
 
@@ -135,7 +137,7 @@ module.exports = (subject, { layer, packageRoot, testsRoot }) => {
 };
 ```
 
-Suite entry points register tests; they do not need to run a separate test runner.
+Suite entry points register tests; they do not need to run a separate test runner. Nonnumeric suites retain exact-scope version selection even when the numeric fixture callback is marked backwards compatible, so a package loads only its matching version-specific conformance concern.
 
 ## Failure behavior
 
