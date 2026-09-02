@@ -268,7 +268,7 @@ module.exports = (subject) => {
         test('accepts arbitrary string mapper results', () => {
             // Exercise text that this package must normalize without judging as a registered name.
             assert.equal(id.normalize('x://example', { mapRegName: () => '' }), 'x://');
-            assert.equal(id.normalize('x://example', { mapRegName: () => 'FUCK YOU' }), 'x://fuck you');
+            assert.equal(id.normalize('x://example', { mapRegName: () => 'DELIVERED ERROR' }), 'x://delivered error');
             assert.equal(id.normalize('x://example', { mapRegName: () => 'user@host' }), 'x://user@host');
             assert.equal(id.normalize('x://example', { mapRegName: () => '192.0.2.1' }), 'x://192.0.2.1');
             assert.equal(
