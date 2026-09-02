@@ -83,6 +83,27 @@ module.exports = (id) => {
         });
     });
 
+    // Verify dot-segment fallbacks by comparing results after RFC reference resolution.
+    describe('toRelativeReference dot-segment resolution equivalence', () => {
+        // Avoid constructing a relative form whose target spelling is removed during resolution.
+        test('falls back for target dot segments', () => {
+            const target = 'https://example.com/a/b/../c?query#fragment';
+            const base = 'https://example.com/a/x';
+            const relative = id.toRelativeReference(target, base);
+            assert.equal(relative, target);
+            assert.equal(id.resolveReference(relative, base), id.resolveReference(target, base));
+        });
+
+        // Avoid deriving traversal depth from an abnormal base-path spelling.
+        test('falls back for base dot segments', () => {
+            const target = 'https://example.com/a/c';
+            const base = 'https://example.com/a/./x';
+            const relative = id.toRelativeReference(target, base);
+            assert.equal(relative, target);
+            assert.equal(id.resolveReference(relative, base), id.resolveReference(target, base));
+        });
+    });
+
     // Reconstruct the documented 2,646-case URI/IRI component matrix.
     const matrixFamilies = [
         {

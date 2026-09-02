@@ -31,6 +31,29 @@ module.exports = (id) => {
         });
     });
 
+    // Verify both ABNF-permitted cases of the IPvFuture version marker.
+    describe('URI and IRI IPvFuture host validation', () => {
+        // Retain coverage for the conventional lowercase marker.
+        test('URI accepts a lowercase IPvFuture version marker', () => {
+            assert.equal(id.isUri('scheme://[v1.a]'), true);
+        });
+
+        // Enforce ABNF literal case-insensitivity for URI hosts.
+        test('URI accepts an uppercase IPvFuture version marker', () => {
+            assert.equal(id.isUri('scheme://[V1.a]'), true);
+        });
+
+        // Retain equivalent lowercase-marker coverage through IRI grammar.
+        test('IRI accepts a lowercase IPvFuture version marker', () => {
+            assert.equal(id.isIri('scheme://[v1.a]'), true);
+        });
+
+        // Enforce ABNF literal case-insensitivity for IRI hosts.
+        test('IRI accepts an uppercase IPvFuture version marker', () => {
+            assert.equal(id.isIri('scheme://[V1.a]'), true);
+        });
+    });
+
     describe('isUri – IPv6 host validation', () => {
         test('Valid full (uncompressed) IPv6 address', () => {
             assert.equal(id.isUri('https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]'), true);
@@ -220,8 +243,19 @@ module.exports = (id) => {
             assert.equal(id.isUri('https://example.com:0'), true);
         });
 
-        test('Valid port at max edge', () => {
-            assert.equal(id.isUri('https://example.com:65535'), true);
+        // Keep lexical leading zeroes independent of transport interpretation.
+        test('Valid port with leading zeroes', () => {
+            assert.equal(id.isUri('https://example.com:00080'), true);
+        });
+
+        // Keep generic syntax independent of transport-specific numeric ranges.
+        test('Valid port beyond a transport-specific numeric range', () => {
+            assert.equal(id.isUri('https://example.com:65536'), true);
+        });
+
+        // Verify that the RFC repetition has no grammar-level upper length bound.
+        test('Valid arbitrarily long port syntax', () => {
+            assert.equal(id.isUri('https://example.com:12345678901234567890'), true);
         });
 
         test('Valid port empty', () => {
@@ -244,8 +278,9 @@ module.exports = (id) => {
             assertError(() => id.isUri('https://example.com:ff'), 'Invalid URI: https://example.com:ff');
         });
 
-        test('Invalid port beyond edge', () => {
-            assertError(() => id.isUri('https://example.com:65536'), 'Invalid URI: https://example.com:65536');
+        // Preserve the grammar boundary at decimal digits rather than numeric range.
+        test('Invalid port with a nondigit', () => {
+            assertError(() => id.isUri('https://example.com:6553a'), 'Invalid URI: https://example.com:6553a');
         });
     });
 
@@ -258,8 +293,19 @@ module.exports = (id) => {
             assert.equal(id.isIri('https://example.com:0'), true);
         });
 
-        test('Valid port at max edge', () => {
-            assert.equal(id.isIri('https://example.com:65535'), true);
+        // Keep lexical leading zeroes independent of transport interpretation.
+        test('Valid port with leading zeroes', () => {
+            assert.equal(id.isIri('https://example.com:00080'), true);
+        });
+
+        // Keep generic syntax independent of transport-specific numeric ranges.
+        test('Valid port beyond a transport-specific numeric range', () => {
+            assert.equal(id.isIri('https://example.com:65536'), true);
+        });
+
+        // Verify that the RFC repetition has no grammar-level upper length bound.
+        test('Valid arbitrarily long port syntax', () => {
+            assert.equal(id.isIri('https://example.com:12345678901234567890'), true);
         });
 
         test('Valid port empty', () => {
@@ -282,8 +328,9 @@ module.exports = (id) => {
             assertError(() => id.isIri('https://example.com:ff'), 'Invalid IRI: https://example.com:ff');
         });
 
-        test('Invalid port beyond edge', () => {
-            assertError(() => id.isIri('https://example.com:65536'), 'Invalid IRI: https://example.com:65536');
+        // Preserve the grammar boundary at decimal digits rather than numeric range.
+        test('Invalid port with a nondigit', () => {
+            assertError(() => id.isIri('https://example.com:6553a'), 'Invalid IRI: https://example.com:6553a');
         });
     });
 

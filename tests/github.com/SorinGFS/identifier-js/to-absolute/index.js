@@ -16,6 +16,11 @@ module.exports = (id) => {
             assert.equal(id.toAbsoluteReference('http://examplé.org/rosé#dasd'), 'http://examplé.org/rosé');
         });
 
+        // Preserve path spelling because absolute conversion removes only the fragment.
+        test('Base with dot segments', () => {
+            assert.equal(id.toAbsoluteReference('http://examplé.org/a/../rosé#dasd'), 'http://examplé.org/a/../rosé');
+        });
+
         test('Base with empty path', () => {
             assert.equal(id.toAbsoluteReference('http://examplé.org'), 'http://examplé.org');
         });

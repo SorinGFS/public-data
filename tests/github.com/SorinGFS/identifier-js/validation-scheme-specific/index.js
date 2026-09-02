@@ -300,6 +300,23 @@ module.exports = (id) => {
             assert.equal(id.isUri('WSs://example'), true);
         });
 
+        // Accept RFC 8089's empty file authority while preserving its absolute path.
+        test('Valid empty file host with an absolute URI path', () => {
+            const parsed = id.parseUri('fILE:///path/to/file');
+            assert.equal(id.isUri('file:///'), true);
+            assert.equal(parsed.authority, '');
+            assert.equal(parsed.host, '');
+            assert.equal(parsed.path, '/path/to/file');
+        });
+
+        // Keep the empty-host exception isolated from network-oriented scheme policies.
+        test('Invalid empty URI host for network schemes', () => {
+            // Exercise each scheme that continues to require a non-empty host.
+            for (const scheme of ['http', 'https', 'ws', 'wss']) {
+                assertError(() => id.isUri(`${scheme}:///path`), `Invalid URI: ${scheme}:///path`);
+            }
+        });
+
         test('Valid case insensitive file scheme', () => {
             assert.equal(id.isUri('fILE://example'), true);
         });
@@ -605,6 +622,23 @@ module.exports = (id) => {
 
         test('Valid case insensitive wss scheme', () => {
             assert.equal(id.isIri('WSs://example'), true);
+        });
+
+        // Accept RFC 8089's empty file authority with an internationalized absolute path.
+        test('Valid empty file host with an absolute IRI path', () => {
+            const parsed = id.parseIri('fILE:///路径');
+            assert.equal(id.isIri('file:///'), true);
+            assert.equal(parsed.authority, '');
+            assert.equal(parsed.host, '');
+            assert.equal(parsed.path, '/路径');
+        });
+
+        // Keep the empty-host exception isolated from network-oriented scheme policies.
+        test('Invalid empty IRI host for network schemes', () => {
+            // Exercise each scheme that continues to require a non-empty host.
+            for (const scheme of ['http', 'https', 'ws', 'wss']) {
+                assertError(() => id.isIri(`${scheme}:///path`), `Invalid IRI: ${scheme}:///path`);
+            }
         });
 
         test('Valid case insensitive file scheme', () => {
