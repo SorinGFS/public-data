@@ -67,6 +67,18 @@ module.exports = (_subject, { benchmark }) => {
 
 The callback must be a named function exported by the package. Arguments must be JSON-serializable so the harness can reproduce first-call measurements in a fresh process.
 
+A concern can measure a terminal method on the callback's returned value:
+
+```js
+benchmark({
+    callback: 'parseIriReference',
+    method: 'normalize',
+    args: ['https://example.com/a/../b'],
+});
+```
+
+The optional method must be a function and is invoked without arguments after every callback invocation.
+
 A package-load concern uses the dedicated registration function:
 
 ```js

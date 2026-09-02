@@ -17,6 +17,11 @@ const resultMarker = '__BENCHMARK_RESULT__';
 
 // Emit an isolated worker result without adding human-readable output.
 const emitWorkerResult = (result) => process.stdout.write(`${resultMarker}${JSON.stringify(result)}\n`);
+// Invoke either a package export directly or a terminal method on its returned value.
+const invokeDescriptor = (subject, descriptor) => {
+    const result = subject[descriptor.callback].apply(subject, descriptor.args);
+    return descriptor.method ? result[descriptor.method]() : result;
+};
 
 // Measure package loading inside a fresh process after the worker runtime has started.
 if (process.argv[2] === '--worker-load') {
@@ -30,15 +35,14 @@ if (process.argv[2] === '--worker-load') {
 if (process.argv[2] === '--worker-first-runs') {
     const descriptor = JSON.parse(Buffer.from(process.argv[3], 'base64url').toString('utf8'));
     const subject = require(packageRoot);
-    const callback = subject[descriptor.callback];
-    assert.equal(typeof callback, 'function', `Package export ${JSON.stringify(descriptor.callback)} is not a function.`);
+    assert.equal(typeof subject[descriptor.callback], 'function', `Package export ${JSON.stringify(descriptor.callback)} is not a function.`);
     const durationsNs = [];
     let sink;
 
     // Record each initial invocation separately to retain the cold-to-warm progression.
     for (let index = 0; index < descriptor.runs; index++) {
         const started = process.hrtime.bigint();
-        sink = callback.apply(subject, descriptor.args);
+        sink = invokeDescriptor(subject, descriptor);
         durationsNs.push(Number(process.hrtime.bigint() - started));
     }
     emitWorkerResult({ durationsNs, sinkType: typeof sink });
@@ -122,9 +126,7 @@ const summarize = (values) => ({
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 const subject = require(packageRoot);
 const configurationPath = path.join(benchmarksRoot, 'index.json');
-const configuration = fs.existsSync(configurationPath)
-    ? JSON.parse(fs.readFileSync(configurationPath, 'utf8'))
-    : {};
+const configuration = fs.existsSync(configurationPath) ? JSON.parse(fs.readFileSync(configurationPath, 'utf8')) : {};
 if (Object.hasOwn(configuration, 'backwardsCompatible')) {
     assert.equal(typeof configuration.backwardsCompatible, 'boolean', 'index.json.backwardsCompatible must be a boolean.');
 }
@@ -147,6 +149,12 @@ for (const concern of concerns) {
         assert.equal(typeof callback, 'string', `${concernId} must select a callback.`);
         assert.equal(typeof subject[callback], 'function', `Package export ${JSON.stringify(callback)} is not a function.`);
         assert.ok(Array.isArray(options.args), `${concernId} args must be an array.`);
+        const method = options.method;
+        if (method !== undefined) {
+            assert.equal(typeof method, 'string', `${concernId} method must be a string.`);
+            const returned = subject[callback].apply(subject, options.args);
+            assert.equal(typeof returned?.[method], 'function', `${concernId} must select a method returned by ${callback}.`);
+        }
         const serializedArgs = JSON.stringify(options.args);
         assert.notEqual(serializedArgs, undefined, `${concernId} args must be JSON-serializable.`);
         assert.deepEqual(JSON.parse(serializedArgs), options.args, `${concernId} args must preserve their values through JSON.`);
@@ -155,6 +163,7 @@ for (const concern of concerns) {
             type: 'function',
             id: benchmarkId,
             callback,
+            method,
             args: options.args,
             initialCalls: defaults.initialCalls,
             warmup: validateCount(options.warmup ?? defaults.warmup, `${benchmarkId} warmup`),
@@ -201,15 +210,15 @@ for (const registration of registrations) {
 
     const first = runWorker('--worker-first-runs', {
         callback: registration.callback,
+        method: registration.method,
         args: registration.args,
         runs: registration.initialCalls,
     });
-    const callback = subject[registration.callback];
     let sink;
 
-    // Warm the selected function before collecting steady-state samples.
+    // Warm the selected function or returned method before collecting steady-state samples.
     for (let index = 0; index < registration.warmup; index++) {
-        sink = callback.apply(subject, registration.args);
+        sink = invokeDescriptor(subject, registration);
     }
 
     const sampleNsPerOperation = [];
@@ -219,7 +228,7 @@ for (const registration of registrations) {
         const started = process.hrtime.bigint();
         // Consume each result so benchmark calls remain observably used.
         for (let index = 0; index < registration.iterations; index++) {
-            sink = callback.apply(subject, registration.args);
+            sink = invokeDescriptor(subject, registration);
         }
         const durationNs = Number(process.hrtime.bigint() - started);
         sampleNsPerOperation.push(durationNs / registration.iterations);
@@ -231,6 +240,7 @@ for (const registration of registrations) {
         id: registration.id,
         type: registration.type,
         callback: registration.callback,
+        method: registration.method,
         args: registration.args,
         initialCallsMs,
         warmup: registration.warmup,

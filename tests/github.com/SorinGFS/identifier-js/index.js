@@ -16,9 +16,7 @@ const packageRoot = path.resolve(testsRoot, '../../..');
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 const subject = require(packageRoot);
 const configurationPath = path.join(testsRoot, 'index.json');
-const configuration = fs.existsSync(configurationPath)
-    ? JSON.parse(fs.readFileSync(configurationPath, 'utf8'))
-    : {};
+const configuration = fs.existsSync(configurationPath) ? JSON.parse(fs.readFileSync(configurationPath, 'utf8')) : {};
 if (Object.hasOwn(configuration, 'backwardsCompatible')) {
     assert.equal(typeof configuration.backwardsCompatible, 'boolean', 'index.json.backwardsCompatible must be a boolean.');
 }
