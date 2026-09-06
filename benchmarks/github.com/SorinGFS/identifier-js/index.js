@@ -20,7 +20,7 @@ const emitWorkerResult = (result) => process.stdout.write(`${resultMarker}${JSON
 // Invoke either a package export directly or a terminal method on its returned value.
 const invokeDescriptor = (subject, descriptor) => {
     const result = subject[descriptor.callback].apply(subject, descriptor.args);
-    return descriptor.method ? result[descriptor.method]() : result;
+    return descriptor.method ? result[descriptor.method].apply(result, descriptor.methodArgs) : result;
 };
 
 // Measure package loading inside a fresh process after the worker runtime has started.
@@ -150,21 +150,27 @@ for (const concern of concerns) {
         assert.equal(typeof subject[callback], 'function', `Package export ${JSON.stringify(callback)} is not a function.`);
         assert.ok(Array.isArray(options.args), `${concernId} args must be an array.`);
         const method = options.method;
+        const methodArgs = options.methodArgs ?? [];
         if (method !== undefined) {
             assert.equal(typeof method, 'string', `${concernId} method must be a string.`);
+            assert.ok(Array.isArray(methodArgs), `${concernId} methodArgs must be an array.`);
             const returned = subject[callback].apply(subject, options.args);
             assert.equal(typeof returned?.[method], 'function', `${concernId} must select a method returned by ${callback}.`);
-        }
+        } else assert.equal(options.methodArgs, undefined, `${concernId} methodArgs require a method.`);
         const serializedArgs = JSON.stringify(options.args);
+        const serializedMethodArgs = JSON.stringify(methodArgs);
         assert.notEqual(serializedArgs, undefined, `${concernId} args must be JSON-serializable.`);
+        assert.notEqual(serializedMethodArgs, undefined, `${concernId} methodArgs must be JSON-serializable.`);
         assert.deepEqual(JSON.parse(serializedArgs), options.args, `${concernId} args must preserve their values through JSON.`);
-        const benchmarkId = `${concernId} / ${serializedArgs}`;
+        assert.deepEqual(JSON.parse(serializedMethodArgs), methodArgs, `${concernId} methodArgs must preserve their values through JSON.`);
+        const benchmarkId = `${concernId} / ${serializedArgs}${method === undefined ? '' : ` / ${method}(${serializedMethodArgs})`}`;
         registrations.push({
             type: 'function',
             id: benchmarkId,
             callback,
             method,
             args: options.args,
+            methodArgs,
             initialCalls: defaults.initialCalls,
             warmup: validateCount(options.warmup ?? defaults.warmup, `${benchmarkId} warmup`),
             iterations: defaults.iterations,

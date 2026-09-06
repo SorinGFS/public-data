@@ -73,11 +73,12 @@ A concern can measure a terminal method on the callback's returned value:
 benchmark({
     callback: 'parseIriReference',
     method: 'normalize',
-    args: ['https://example.com/a/../b'],
+    methodArgs: [{ transform: 'IRI' }],
+    args: ['https://example.com/caf%C3%A9'],
 });
 ```
 
-The optional method must be a function and is invoked without arguments after every callback invocation.
+The optional method must be a function returned by the callback. It receives the optional JSON-serializable `methodArgs` after every callback invocation; omitting `methodArgs` invokes it without arguments.
 
 A package-load concern uses the dedicated registration function:
 
@@ -102,7 +103,7 @@ Package load time is measured inside a fresh child process for every sample. Chi
 
 The harness consumes operation results, executes registrations serially, and reports minimum, median, 95th percentile, and maximum measurements where applicable. It records package, Node.js, platform, architecture, and CPU metadata with the report.
 
-The human-readable report prints workload counts at the beginning and places each representative argument list directly in its benchmark heading. Initial invocations use distinct `initial call 1`, `initial call 2`, and subsequent rows so progression toward warmed execution remains visible. All reported durations use milliseconds, scalar results are right-aligned, and measured timing values use six digits after the decimal delimiter. JSON fields such as `initialCallsMs` and `warmMsPerOperation` state their timing units explicitly; throughput remains operations per second and is rounded to an integer.
+The human-readable report prints workload counts at the beginning and places each representative callback and terminal-method argument list directly in its benchmark heading. Initial invocations use distinct `initial call 1`, `initial call 2`, and subsequent rows so progression toward warmed execution remains visible. All reported durations use milliseconds, scalar results are right-aligned, and measured timing values use six digits after the decimal delimiter. JSON fields such as `initialCallsMs` and `warmMsPerOperation` state their timing units explicitly; throughput remains operations per second and is rounded to an integer.
 
 ## Workload configuration
 
