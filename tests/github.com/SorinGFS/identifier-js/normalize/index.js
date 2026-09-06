@@ -13,18 +13,12 @@ module.exports = (subject) => {
     describe('parsed normalize generic syntax', () => {
         // Apply case, percent-triplet, unreserved, and path transformations component by component.
         test('normalizes a complete URI reference', () => {
-            assert.equal(
-                id.normalize('HTTP://Example.COM/%7e/a/../b?x=%2f#%41'),
-                'http://example.com/~/b?x=%2F#A',
-            );
+            assert.equal(id.normalize('HTTP://Example.COM/%7e/a/../b?x=%2f#%41'), 'http://example.com/~/b?x=%2F#A');
         });
 
         // Preserve component-specific case while normalizing each allowed percent-encoded value.
         test('normalizes authority and data components independently', () => {
-            assert.equal(
-                id.normalize('x://Us%65r@EX%41MPLE/%7e/%2f?x=%41%2f#%7e%23'),
-                'x://User@example/~/%2F?x=A%2F#~%23',
-            );
+            assert.equal(id.normalize('x://Us%65r@EX%41MPLE/%7e/%2f?x=%41%2f#%7e%23'), 'x://User@example/~/%2F?x=A%2F#~%23');
         });
 
         // Keep delimiters that distinguish present-empty components from absent components.
@@ -95,10 +89,7 @@ module.exports = (subject) => {
 
         // Retain percent encoding when decoding it would reclassify a registered name as IPv4.
         test('preserves registered-name host kind', () => {
-            assert.equal(
-                id.normalize('x://%31%39%32.0.2.1/'),
-                'x://%31%39%32.0.2.1/',
-            );
+            assert.equal(id.normalize('x://%31%39%32.0.2.1/'), 'x://%31%39%32.0.2.1/');
         });
 
         // Remove every decimal spelling of the HTTP and WebSocket scheme default ports.
@@ -187,10 +178,7 @@ module.exports = (subject) => {
                 received = regName;
                 return 'XN--EXMPLE-CUA.COM';
             };
-            assert.equal(
-                id.normalize('https://Exämple.com/%7e', { mapRegName }),
-                'https://xn--exmple-cua.com/~',
-            );
+            assert.equal(id.normalize('https://Exämple.com/%7e', { mapRegName }), 'https://xn--exmple-cua.com/~');
             assert.equal(received, 'Exämple.com');
             assert.equal(calls, 1);
         });
@@ -271,21 +259,9 @@ module.exports = (subject) => {
             assert.equal(id.normalize('x://example', { mapRegName: () => 'DELIVERED ERROR' }), 'x://delivered error');
             assert.equal(id.normalize('x://example', { mapRegName: () => 'user@host' }), 'x://user@host');
             assert.equal(id.normalize('x://example', { mapRegName: () => '192.0.2.1' }), 'x://192.0.2.1');
-            assert.equal(
-                id.normalize('x://example', { mapRegName: () => '%31%39%32.0.2.1' }),
-                'x://192.0.2.1',
-            );
-            assert.equal(
-                subject.parseUriReference('x://example').normalize({ mapRegName: () => 'é.example' }),
-                'x://é.example',
-            );
-            assert.equal(
-                subject.parseIriReference('x://example').normalize({
-                    transform: 'URI',
-                    mapRegName: () => '\uE000',
-                }),
-                'x://%EE%80%80',
-            );
+            assert.equal(id.normalize('x://example', { mapRegName: () => '%31%39%32.0.2.1' }), 'x://192.0.2.1');
+            assert.equal(subject.parseUriReference('x://example').normalize({ mapRegName: () => 'é.example' }), 'x://é.example');
+            assert.equal(subject.parseIriReference('x://example').normalize({ transform: 'URI', mapRegName: () => '\uE000', }), 'x://%EE%80%80');
         });
 
         // Preserve the mapper's own failure rather than disguising its policy decision.
@@ -313,10 +289,7 @@ module.exports = (subject) => {
                 received = regName;
                 return 'xn--r8jz45g.xn--zckzah';
             };
-            assert.equal(
-                parsed.normalize({ transform: 'URI', mapRegName }),
-                'https://us%C3%A9r@xn--r8jz45g.xn--zckzah/caf%C3%A9?q=%E8%B3%87%E6%96%99%EE%80%80#%E7%B5%90%E6%9E%9C',
-            );
+            assert.equal(parsed.normalize({ transform: 'URI', mapRegName }), 'https://us%C3%A9r@xn--r8jz45g.xn--zckzah/caf%C3%A9?q=%E8%B3%87%E6%96%99%EE%80%80#%E7%B5%90%E6%9E%9C');
             assert.equal(received, '例え.テスト');
             assert.equal(calls, 1);
             assert.deepEqual(Object.assign({}, parsed), components);
@@ -339,10 +312,7 @@ module.exports = (subject) => {
 
         // Retain existing percent triplets while encoding supplementary Unicode scalars once.
         test('preserves encoded octets and encodes supplementary characters', () => {
-            assert.equal(
-                id.normalize('x:/%c3%a9/%7e/😀?x=%e8%b3%87&y=😀#%41😀', { transform: 'URI' }),
-                'x:/%C3%A9/~/%F0%9F%98%80?x=%E8%B3%87&y=%F0%9F%98%80#A%F0%9F%98%80',
-            );
+            assert.equal(id.normalize('x:/%c3%a9/%7e/😀?x=%e8%b3%87&y=😀#%41😀', { transform: 'URI' }), 'x:/%C3%A9/~/%F0%9F%98%80?x=%E8%B3%87&y=%F0%9F%98%80#A%F0%9F%98%80');
         });
 
         // Use RFC 3987 percent encoding for an internationalized generic registered name.
@@ -355,26 +325,14 @@ module.exports = (subject) => {
         // Leave DNS-oriented hostname representation entirely to the optional mapper.
         test('does not validate mapped names for recognized schemes', () => {
             const parsed = subject.parseIri('https://例え.テスト/');
-            assert.equal(
-                parsed.normalize({ transform: 'URI' }),
-                'https://%E4%BE%8B%E3%81%88.%E3%83%86%E3%82%B9%E3%83%88/',
-            );
-            assert.equal(
-                parsed.normalize({ transform: 'URI', mapRegName: (regName) => regName }),
-                'https://%E4%BE%8B%E3%81%88.%E3%83%86%E3%82%B9%E3%83%88/',
-            );
-            assert.equal(
-                parsed.normalize({ transform: 'URI', mapRegName: () => 'xn--r8jz45g.xn--zckzah' }),
-                'https://xn--r8jz45g.xn--zckzah/',
-            );
+            assert.equal(parsed.normalize({ transform: 'URI' }), 'https://%E4%BE%8B%E3%81%88.%E3%83%86%E3%82%B9%E3%83%88/');
+            assert.equal(parsed.normalize({ transform: 'URI', mapRegName: (regName) => regName }), 'https://%E4%BE%8B%E3%81%88.%E3%83%86%E3%82%B9%E3%83%88/');
+            assert.equal(parsed.normalize({ transform: 'URI', mapRegName: () => 'xn--r8jz45g.xn--zckzah' }), 'https://xn--r8jz45g.xn--zckzah/');
         });
 
         // Keep URI parser results compatible with the same explicit output option.
         test('accepts URI output for existing URI parser results', () => {
-            assert.equal(
-                subject.parseUri('HTTP://EXAMPLE.COM:80/%7e?q=%2f#%41').normalize({ transform: 'URI' }),
-                'http://example.com/~?q=%2F#A',
-            );
+            assert.equal(subject.parseUri('HTTP://EXAMPLE.COM:80/%7e?q=%2f#%41').normalize({ transform: 'URI' }), 'http://example.com/~?q=%2F#A');
         });
 
         // Reject malformed structured options at the public method boundary.
@@ -396,10 +354,7 @@ module.exports = (subject) => {
         test('decodes every internationalized component without mutation', () => {
             const parsed = subject.parseIriReference('x://us%C3%A9r@r%C3%A9sum%C3%A9.example/%F0%9F%98%80?q=%E8%B3%87%E6%96%99#r%C3%A9sultat');
             const components = Object.assign({}, parsed);
-            assert.equal(
-                parsed.normalize({ transform: 'IRI' }),
-                'x://usér@résumé.example/😀?q=資料#résultat',
-            );
+            assert.equal(parsed.normalize({ transform: 'IRI' }), 'x://usér@résumé.example/😀?q=資料#résultat');
             assert.deepEqual(Object.assign({}, parsed), components);
         });
 
@@ -451,10 +406,7 @@ module.exports = (subject) => {
         test('uses mapper output before IRI transformation', () => {
             const parsed = subject.parseUri('https://XN--R8JZ45G.XN--ZCKZAH/%C3%A9');
             assert.equal(parsed.normalize({ transform: 'IRI' }), 'https://xn--r8jz45g.xn--zckzah/é');
-            assert.equal(
-                parsed.normalize({ transform: 'IRI', mapRegName: () => '例え.テスト' }),
-                'https://例え.テスト/é',
-            );
+            assert.equal(parsed.normalize({ transform: 'IRI', mapRegName: () => '例え.テスト' }), 'https://例え.テスト/é');
         });
 
         // Require both representation transformations to reach fixed points and round-trip normalized text.

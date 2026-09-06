@@ -8,11 +8,7 @@ module.exports = (id) => {
     const assertParsedEqual = (actual, expected) => assert.deepEqual({ ...actual }, expected);
 
     // Match Vitest's Error-subclass and message-content checks.
-    const assertError = (operation, message) => assert.throws(
-        operation,
-        (error) => error instanceof Error && error.message.includes(message),
-    );
-
+    const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
     describe('parseUri', () => {
         test('Full', () => {
