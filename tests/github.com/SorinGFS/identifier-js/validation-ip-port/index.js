@@ -5,11 +5,7 @@ const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
 module.exports = (id) => {
     // Match Vitest's Error-subclass and message-content checks.
-    const assertError = (operation, message) => assert.throws(
-        operation,
-        (error) => error instanceof Error && error.message.includes(message),
-    );
-
+    const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
     describe('isUri – IPv4 host validation', () => {
         test('Valid full IPv4 address', () => {

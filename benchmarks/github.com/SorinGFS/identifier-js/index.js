@@ -79,10 +79,7 @@ for (let index = 2; index < process.argv.length; index++) {
         index++;
     } else throw new Error(`Unknown benchmark option: ${option}`);
 }
-assert.ok(
-    requestedIterations === undefined || process.env.npm_lifecycle_event !== 'benchmark',
-    'Custom iterations require direct invocation with node ./#/public/benchmarks.',
-);
+assert.ok(requestedIterations === undefined || process.env.npm_lifecycle_event !== 'benchmark', 'Custom iterations require direct invocation with node ./#/public/benchmarks.');
 
 const defaults = {
     initialCalls: 5,

@@ -11,7 +11,6 @@ module.exports = (id) => {
         for (const values of cases) test(format(name, ...values), () => callback(...values));
     };
 
-
     // Verify relative-reference generation and round trips through reference resolution.
     describe('toRelativeReference IRI', () => {
         testEach([
@@ -143,11 +142,7 @@ module.exports = (id) => {
                                 // Register each combination separately so failures identify every component state.
                                 test(description, () => {
                                     const relative = id.toRelativeReference(target, base);
-                                    assert.equal(
-                                        id.resolveReference(relative, base),
-                                        target,
-                                        `Generated reference ${JSON.stringify(relative)} must round-trip`,
-                                    );
+                                    assert.equal(id.resolveReference(relative, base), target, `Generated reference ${JSON.stringify(relative)} must round-trip`);
                                 });
                             }
                         }
