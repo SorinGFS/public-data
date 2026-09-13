@@ -7,8 +7,8 @@ module.exports = (id) => {
 
     // Verify reference resolution behavior beyond the RFC's published examples.
     const resolveTests = [
-        ['urn:some:ip:prop', 'urn:some:ip:prop', 'urn:some:ip:prop'],
-        ['urn:some:ip:prop', 'urn:some:other:prop', 'urn:some:ip:prop'],
+        ['example:some:ip:prop', 'example:some:ip:prop', 'example:some:ip:prop'],
+        ['example:some:ip:prop', 'example:some:other:prop', 'example:some:ip:prop'],
     ];
 
     describe('resolveReference', () => {
