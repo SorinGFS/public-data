@@ -37,6 +37,7 @@ The Unicode 17.0 concern requires `process.versions.unicode` to be at least `17.
 #/public/tests/
   index.js
   index.json
+  idnaTestV2.js              # Shared version-independent conformance registrar
   v15.1/
     0/                       # 108 Unicode 15.1 package fixtures
     idna-test-v2/            # Unicode 15.1 conformance concern
@@ -46,7 +47,11 @@ The Unicode 17.0 concern requires `process.versions.unicode` to be at least `17.
   v17.0/
     0/                       # 7 Unicode 17.0 additions
     idna-test-v2/            # Unicode 17.0 conformance concern
+  v18.0/
+    0/                       # Prepared Unicode 18.0 additions
+    idna-test-v2/            # Prepared Unicode 18.0 conformance concern
       index.js
+      IdnaTestV2.json
       IdnaTestV2.txt
       IdnaMappingTable.txt
 ```

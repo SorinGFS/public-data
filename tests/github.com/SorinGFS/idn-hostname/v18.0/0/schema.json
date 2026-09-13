@@ -1,0 +1,4 @@
+{
+    "description": "Unicode 18.0 internationalized hostname regression and version-specific cases",
+    "$ref": "#/#/#/idn-hostname"
+}

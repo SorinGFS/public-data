@@ -1,0 +1,5 @@
+{
+    "description": "valid newly assigned U+1ADE COMBINING GRAVE-DOT after an ASCII letter",
+    "data": "a\u1ADE",
+    "valid": true
+}
