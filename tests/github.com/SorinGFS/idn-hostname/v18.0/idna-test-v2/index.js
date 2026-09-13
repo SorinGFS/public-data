@@ -1,5 +1,5 @@
 'use strict';
-// Register Unicode 15.1 IdnaTestV2 vectors through the shared version-independent registrar.
+// Register Unicode 18.0 IdnaTestV2 vectors through the shared version-independent registrar.
 const registerIdnaTestV2 = require('../../idnaTestV2.js');
 const metadata = require('./IdnaTestV2.json');
 
