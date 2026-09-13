@@ -1,0 +1,73 @@
+namestring:
+  syntax: |
+    assigned-name [ rq-components ] [ "#" f-component ]
+  description: Complete RFC 8141 URN syntax, including optional resolution, query, and fragment components.
+assigned-name:
+  syntax: |
+    "urn" ":" NID ":" NSS
+  description: Persistent assigned-name portion used for generic URN-equivalence.
+NID:
+  syntax: |
+    (alphanum) 0*30(ldh) (alphanum)
+  description: Case-insensitive 2-to-32-character namespace identifier; registration and namespace legitimacy are separate concerns.
+ldh:
+  syntax: |
+    alphanum / "-"
+  description: ASCII letter, digit, or internal hyphen permitted in an NID.
+alphanum:
+  syntax: |
+    ALPHA / DIGIT
+  description: ASCII letter or digit.
+NSS:
+  syntax: |
+    pchar *( pchar / "/" )
+  description: Non-empty namespace-specific string; namespace-specific syntax and assignment rules are not defined by the generic grammar.
+rq-components:
+  syntax: |
+    [ "?+" r-component ] [ "?=" q-component ]
+  description: Optional ordered resolution and query components. A question mark outside these introducers is a URN syntax error.
+r-component:
+  syntax: |
+    pchar *( pchar / "/" / "?" )
+  description: Non-empty resolution-service component introduced by ?+ and terminated by the first ?= sequence, #, or the end of the URN.
+q-component:
+  syntax: |
+    pchar *( pchar / "/" / "?" )
+  description: Non-empty resource or application query component introduced by ?= and terminated by # or the end of the URN.
+f-component:
+  syntax: |
+    fragment
+  description: Possibly empty fragment component interpreted by the client and introduced by #.
+pchar:
+  syntax: |
+    unreserved / pct-encoded / sub-delims / ":" / "@"
+  description: RFC 3986 path character imported by RFC 8141.
+fragment:
+  syntax: |
+    *( pchar / "/" / "?" )
+  description: RFC 3986 fragment syntax imported by RFC 8141.
+unreserved:
+  syntax: |
+    ALPHA / DIGIT / "-" / "." / "_" / "~"
+  description: RFC 3986 unreserved ASCII character.
+pct-encoded:
+  syntax: |
+    "%" HEXDIG HEXDIG
+  description: RFC 3986 percent-encoded octet.
+sub-delims:
+  syntax: |
+    "!" / "$" / "&" / "'" / "(" / ")"
+    / "*" / "+" / "," / ";" / "="
+  description: RFC 3986 subcomponent delimiter.
+ALPHA:
+  syntax: |
+    %x41-5A / %x61-7A
+  description: ASCII letters A-Z or a-z from RFC 5234.
+DIGIT:
+  syntax: |
+    %x30-39
+  description: ASCII digits 0-9 from RFC 5234.
+HEXDIG:
+  syntax: |
+    DIGIT / %x41-46 / %x61-66
+  description: ASCII hexadecimal digit from RFC 5234.
