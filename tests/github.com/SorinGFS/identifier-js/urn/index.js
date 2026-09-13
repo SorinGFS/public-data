@@ -129,7 +129,8 @@ module.exports = (id) => {
             assert.equal(parsed.nss, 'a%62/../c');
             assert.equal(parsed.rComponent, 'foo');
             assert.equal(parsed.qComponent, 'bar');
-            assert.equal(parsed.fragment, 'frag');
+            assert.equal(parsed.fComponent, 'frag');
+            assert.equal('fragment' in parsed, false);
         });
 
         // Terminate r-component data at the first q-component introducer.
@@ -151,12 +152,12 @@ module.exports = (id) => {
             const plain = id.parseUri('urn:example:a');
             assert.equal(plain.rComponent, undefined);
             assert.equal(plain.qComponent, undefined);
-            assert.equal(plain.fragment, undefined);
+            assert.equal(plain.fComponent, undefined);
             const fragmented = id.parseUri('urn:example:a#');
-            assert.equal(fragmented.fragment, '');
+            assert.equal(fragmented.fComponent, '');
         });
 
-        // Select the URN profile through each complete or fragment-free parser.
+        // Select RFC 8141 grammar through each complete or fragment-free parser.
         test('provides URN captures through every applicable parser entry point', () => {
             const cases = [
                 ['parseUri', 'urn:example:a#f'],
@@ -166,12 +167,16 @@ module.exports = (id) => {
                 ['parseIriReference', 'urn:example:a#f'],
                 ['parseAbsoluteIri', 'urn:example:a?=q'],
             ];
-            // Verify profile selection independently for every compiled parser rule.
+            // Verify scheme-specific captures independently for every compiled parser rule.
             for (const [callback, value] of cases) {
                 const parsed = id[callback](value);
                 assert.equal(parsed.nid, 'example', `${callback} must expose the NID`);
                 assert.equal(parsed.nss, 'a', `${callback} must expose the NSS`);
                 assert.equal(typeof parsed.normalize, 'function', `${callback} must expose chained normalization`);
+                // Exclude generic hierarchical component aliases from URN results.
+                for (const key of ['authority', 'userinfo', 'host', 'port', 'path', 'query', 'fragment']) {
+                    assert.equal(key in parsed, false, `${callback} must not expose ${key}`);
+                }
             }
         });
 
@@ -229,7 +234,7 @@ module.exports = (id) => {
             parsed.nss = 'A%62/../C';
             parsed.rComponent = 'new%2fr';
             parsed.qComponent = 'new%2fq';
-            parsed.fragment = 'new%2ff';
+            parsed.fComponent = 'new%2ff';
             const components = { ...parsed };
             assert.equal(parsed.normalize(), 'urn:changed:A%62/../C?+new%2Fr?=new%2Fq#new%2Ff');
             assert.deepEqual({ ...parsed }, components);
