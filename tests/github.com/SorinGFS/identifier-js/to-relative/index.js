@@ -68,13 +68,13 @@ module.exports = (id) => {
             ['preserves an empty target query', 'https://example.com/a/item?', 'https://example.com/a/item?old', '?'],
             ['preserves an empty target fragment', 'https://example.com/a/item#', 'https://example.com/a/item', '#'],
             ['clears a query on an empty path', 'https://example.com', 'https://example.com?old', '//example.com'],
-            ['clears a query on a colon-containing rootless path', 'urn:a:b', 'urn:a:b?old', './a:b'],
+            ['clears a query on a colon-containing rootless path', 'example:a:b', 'example:a:b?old', './a:b'],
             ['produces an empty path from a non-empty base path', 'https://example.com', 'https://example.com/a', '//example.com'],
             ['produces a root path from a single-segment base path', 'https://example.com/', 'https://example.com/a', '/'],
-            ['preserves a trailing slash on a rootless directory', 'urn:a/', 'urn:a/b', './'],
-            ['protects a colon-containing first path segment', 'urn:a:b', 'urn:c', './a:b'],
-            ['falls back for an empty rootless target path', 'urn:', 'urn:a', 'urn:'],
-            ['falls back when rootless parent traversal changes path form', 'urn:a', 'urn:a/', 'urn:a'],
+            ['preserves a trailing slash on a rootless directory', 'example:a/', 'example:a/b', './'],
+            ['protects a colon-containing first path segment', 'example:a:b', 'example:c', './a:b'],
+            ['falls back for an empty rootless target path', 'example:', 'example:a', 'example:'],
+            ['falls back when rootless parent traversal changes path form', 'example:a', 'example:a/', 'example:a'],
         ])('%s', (description, target, base, expected) => {
             const relative = id.toRelativeReference(target, base);
             assert.equal(relative, expected);
