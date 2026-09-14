@@ -16,7 +16,7 @@ Node loads `index.js`, which discovers fixtures and suites explicitly. It does n
 
 ## Portability and CI use
 
-This structure is intended to be reusable across projects. The dispatcher, directory rules, version-layer behavior, JSON fixture shape, and suite-registration contract remain the same; each project supplies only its package exports, optional `index.json` callback selection, fixtures, and concern suites. The dispatcher delegates exact and cumulative layer selection, numbered-fixture traversal, and explicit concern discovery to the extension-managed `#/version-layers.js` v0.5 runtime.
+This structure is reusable across projects. The dispatcher, directory rules, version-layer behavior, JSON fixture shape, and suite-registration contract are shared; each project supplies only its package exports, optional `index.json` callback selection, fixtures, and concern suites. The dispatcher delegates exact and cumulative layer selection, numbered-fixture traversal, and explicit concern discovery to the extension-managed `#/version-layers.js` v0.5 runtime.
 
 The structure is designed for CI runners:
 
