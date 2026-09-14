@@ -113,6 +113,13 @@ module.exports = (subject) => {
             assert.equal(id.normalize('WSS://EXAMPLE.COM'), 'wss://example.com/');
         });
 
+        // Preserve a DNS root marker while applying scheme and host case normalization.
+        test('normalizes hosts with a terminal DNS root separator', () => {
+            assert.equal(id.normalize('HTTP://EXAMPLE.COM.:80'), 'http://example.com./');
+            assert.equal(id.normalize('file://EXAMPLE.COM./path'), 'file://example.com./path');
+            assert.equal(id.normalize('https://例子。'), 'https://例子。/');
+        });
+
         // Remove empty ports only for recognized schemes while preserving non-default values.
         test('preserves other port states', () => {
             assert.equal(id.normalize('HTTP://EXAMPLE.COM:443'), 'http://example.com:443/');
@@ -181,6 +188,18 @@ module.exports = (subject) => {
             assert.equal(id.normalize('https://Exämple.com/%7e', { mapRegName }), 'https://xn--exmple-cua.com/~');
             assert.equal(received, 'Exämple.com');
             assert.equal(calls, 1);
+        });
+
+        // Pass a terminal root separator to the mapper that owns its normalized representation.
+        test('maps a registered name with a terminal DNS root separator', () => {
+            let received;
+            // Record the root-marked input before returning its application-selected ASCII representation.
+            const mapRegName = (regName) => {
+                received = regName;
+                return 'EXAMPLE.COM.';
+            };
+            assert.equal(id.normalize('https://例子。', { mapRegName }), 'https://example.com./');
+            assert.equal(received, '例子。');
         });
 
         // Select a validated Unicode registered-name representation through structured options.
