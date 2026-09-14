@@ -104,10 +104,15 @@ module.exports = (id) => {
         test('Valid - terminal DNS root dot', () => {
             // Exercise each scheme that specializes registered names as DNS hosts.
             for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
-                const input = `${scheme}://example.com.:8443/path?query#fragment`;
+                const absoluteInput = `${scheme}://example.com.:8443/path?query`;
+                const input = absoluteInput + '#fragment';
                 const parsed = id.parseUri(input);
                 assert.equal(id.isUri(input), true);
+                assert.equal(id.isUriReference(input), true);
+                assert.equal(id.isAbsoluteUri(absoluteInput), true);
                 assert.equal(parsed.host, 'example.com.');
+                assert.equal(id.parseUriReference(input).host, 'example.com.');
+                assert.equal(id.parseAbsoluteUri(absoluteInput).host, 'example.com.');
             }
         });
 
@@ -448,10 +453,15 @@ module.exports = (id) => {
             // Preserve each parsed separator while exercising every DNS-host IRI scheme.
             for (const separator of ['.', '\uFF0E', '\u3002', '\uFF61']) {
                 for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
-                    const input = `${scheme}://例子${separator}:8443/path?query#fragment`;
+                    const absoluteInput = `${scheme}://例子${separator}:8443/path?query`;
+                    const input = absoluteInput + '#fragment';
                     const parsed = id.parseIri(input);
                     assert.equal(id.isIri(input), true);
+                    assert.equal(id.isIriReference(input), true);
+                    assert.equal(id.isAbsoluteIri(absoluteInput), true);
                     assert.equal(parsed.host, `例子${separator}`);
+                    assert.equal(id.parseIriReference(input).host, `例子${separator}`);
+                    assert.equal(id.parseAbsoluteIri(absoluteInput).host, `例子${separator}`);
                 }
             }
         });
