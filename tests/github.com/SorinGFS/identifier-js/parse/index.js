@@ -486,10 +486,6 @@ module.exports = (id) => {
         test('returns generic components for complete URNs', () => {
             const expected = {
                 scheme: 'URN',
-                authority: undefined,
-                userinfo: undefined,
-                host: undefined,
-                port: undefined,
                 path: 'EXAMPLE:a%62/../c',
                 query: '+r?x?=q?y',
                 fragment: 'f',
@@ -504,10 +500,6 @@ module.exports = (id) => {
         test('returns generic components for absolute URNs', () => {
             const expected = {
                 scheme: 'URN',
-                authority: undefined,
-                userinfo: undefined,
-                host: undefined,
-                port: undefined,
                 path: 'EXAMPLE:a',
                 query: '=q?+r?=still-q',
             };

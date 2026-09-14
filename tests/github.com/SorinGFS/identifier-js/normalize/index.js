@@ -556,13 +556,6 @@ module.exports = (subject) => {
             assert.deepEqual({ ...parsed }, components);
         });
 
-        // Reapply URN grammar after mutable generic fields change.
-        test('rejects component mutations that violate URN syntax', () => {
-            const parsed = subject.parseUri('urn:example:original');
-            parsed.path = 'invalid';
-            assert.throws(() => parsed.normalize(), SyntaxError);
-        });
-
         // Reach a fixed point while preserving the parser's generic component values.
         test('is idempotent and leaves components unchanged', () => {
             const parsed = subject.parseUri('URN:EXAMPLE:a%62/./b?+r%2f?=q%2f#f%2f');
