@@ -103,6 +103,14 @@ module.exports = (id) => {
         });
     });
 
+    // Keep URN names outside generic relative-reference processing.
+    describe('toRelativeReference URN handling', () => {
+        test('rejects URN targets and bases', () => {
+            assert.throws(() => id.toRelativeReference('urn:example:a', 'https://example.com/base'), /URN reference conversion is not supported/);
+            assert.throws(() => id.toRelativeReference('https://example.com/target', 'urn:example:a'), /URN reference conversion is not supported/);
+        });
+    });
+
     // Reconstruct the documented 2,646-case URI/IRI component matrix.
     const matrixFamilies = [
         {
