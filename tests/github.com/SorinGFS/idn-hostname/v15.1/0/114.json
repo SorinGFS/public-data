@@ -1,0 +1,5 @@
+{
+    "description": "invalid hostname consisting only of U+FF61 HALFWIDTH IDEOGRAPHIC FULL STOP",
+    "data": "\uFF61",
+    "valid": false
+}

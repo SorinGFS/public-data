@@ -1,0 +1,5 @@
+{
+    "description": "valid hostname with a trailing U+FF0E FULLWIDTH FULL STOP root separator",
+    "data": "example.com\uFF0E",
+    "valid": true
+}

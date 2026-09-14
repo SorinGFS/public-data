@@ -1,0 +1,5 @@
+{
+    "description": "invalid hostname consisting only of U+3002 IDEOGRAPHIC FULL STOP",
+    "data": "\u3002",
+    "valid": false
+}
