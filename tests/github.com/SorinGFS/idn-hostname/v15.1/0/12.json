@@ -1,5 +1,5 @@
 {
-    "description": "invalid hostname with trailing dot",
+    "description": "valid hostname with a trailing DNS root dot",
     "data": "example.com.",
-    "valid": false
+    "valid": true
 }

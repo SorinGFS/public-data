@@ -84,7 +84,7 @@ const validateMetadata = (metadata) => {
     assert.ok(metadata && typeof metadata === 'object' && !Array.isArray(metadata), 'IdnaTestV2 metadata must be an object.');
     assert.match(metadata.sourceVersion, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/, 'Invalid IdnaTestV2 metadata sourceVersion.');
     assert.ok(metadata.expectedSummary && typeof metadata.expectedSummary === 'object' && !Array.isArray(metadata.expectedSummary), 'IdnaTestV2 metadata expectedSummary must be an object.');
-    assert.deepEqual(Object.keys(metadata.expectedSummary), ['applicable', 'nv8OrXv8', 'trailingRoot'], 'Unexpected IdnaTestV2 metadata summary fields.');
+    assert.deepEqual(Object.keys(metadata.expectedSummary), ['applicable', 'nv8OrXv8'], 'Unexpected IdnaTestV2 metadata summary fields.');
 
     // Require exact nonnegative inventories rather than allowing coercible JSON values.
     for (const [name, value] of Object.entries(metadata.expectedSummary)) {
@@ -106,26 +106,34 @@ module.exports = (subject, concernRoot, metadata) => {
     );
     const excludedCodePoints = readComparisonExclusions(mappingFile);
     const records = parseIdnaTests(testFile);
-    const summary = { applicable: 0, nv8OrXv8: 0, trailingRoot: 0 };
+    const summary = { applicable: 0, nv8OrXv8: 0 };
 
     // Classify each vector before registering only those applicable to this package's policy.
     for (const record of records) {
-        const relevantStatuses = record.asciiStatus.filter((status) => status !== 'U1');
-        const expectedValid = relevantStatuses.length === 0;
+        const defaultStatuses = record.asciiStatus.filter((status) => status !== 'U1');
+        const defaultExpectedValid = defaultStatuses.length === 0;
         const containsComparisonExclusion = [...record.toUnicode]
             .some((character) => excludedCodePoints[character.codePointAt(0)] === 1);
-        if (expectedValid && containsComparisonExclusion) {
+        if (defaultExpectedValid && containsComparisonExclusion) {
             summary.nv8OrXv8 += 1;
             continue;
         }
-        if (expectedValid && record.toAsciiN.endsWith('.')) {
-            summary.trailingRoot += 1;
-            continue;
-        }
+        // Evaluate A4_2 as root-label syntax when labels and the complete domain name satisfy RFC 1034 §3.1.
+        const rootlessAscii = record.toAsciiN.endsWith('.') ? record.toAsciiN.slice(0, -1) : null;
+        const acceptsTrailingRoot = rootlessAscii !== null
+            && rootlessAscii.length >= 1
+            && rootlessAscii.length <= 253
+            && rootlessAscii.split('.').every((label) => label.length >= 1 && label.length <= 63);
+        const relevantStatuses = defaultStatuses.filter((status) =>
+            !(status === 'A4_2' && acceptsTrailingRoot));
+        const expectedValid = relevantStatuses.length === 0 && !containsComparisonExclusion;
         summary.applicable += 1;
+        const rejectionReasons = containsComparisonExclusion
+            ? [...relevantStatuses, 'NV8/XV8']
+            : relevantStatuses;
         const expectation = expectedValid
             ? 'valid nontransitional ToASCII'
-            : `invalid nontransitional ToASCII (${relevantStatuses.join(', ')})`;
+            : `invalid nontransitional ToASCII (${rejectionReasons.join(', ')})`;
 
         // Exercise validation and conversion together while reporting every vector independently.
         test(`IdnaTestV2.txt:${record.lineNumber} / ${expectation}`, () => {

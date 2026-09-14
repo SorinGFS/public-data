@@ -1,6 +1,6 @@
 # Public test layout
 
-This directory is the single entry point for the materialized public test suite. It retains package fixtures as version-specific deltas and registers only the layers eligible for the tested package version. Because `index.json` declares the selected callback backwards compatible, `idn-hostname@17.0.1` activates the 108 `v15.1` fixtures, seven `v16.0` additions, seven `v17.0` additions, and 6,202 applicable Unicode 17.0.0 `IdnaTestV2.txt` vectors. Run it through the package command:
+This directory is the single entry point for the materialized public test suite. It retains package fixtures as version-specific deltas and registers only the layers eligible for the tested package version. Because `index.json` declares the selected callback backwards compatible, the 17.0 release line activates the 120 `v15.1` fixtures, seven `v16.0` additions, seven `v17.0` additions, and 6,202 applicable Unicode 17.0.0 `IdnaTestV2.txt` vectors. Run it through the package command:
 
 ```sh
 npm test

@@ -1,0 +1,5 @@
+{
+    "description": "invalid hostname with a leading U+3002 IDEOGRAPHIC FULL STOP separator",
+    "data": "\u3002example",
+    "valid": false
+}

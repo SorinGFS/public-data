@@ -1,0 +1,5 @@
+{
+    "description": "invalid hostname consisting only of U+FF0E FULLWIDTH FULL STOP",
+    "data": "\uFF0E",
+    "valid": false
+}
