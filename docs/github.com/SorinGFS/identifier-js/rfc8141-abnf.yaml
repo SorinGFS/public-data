@@ -46,28 +46,5 @@ fragment:
   syntax: |
     *( pchar / "/" / "?" )
   description: RFC 3986 fragment syntax imported by RFC 8141.
-unreserved:
-  syntax: |
-    ALPHA / DIGIT / "-" / "." / "_" / "~"
-  description: RFC 3986 unreserved ASCII character.
-pct-encoded:
-  syntax: |
-    "%" HEXDIG HEXDIG
-  description: RFC 3986 percent-encoded octet.
-sub-delims:
-  syntax: |
-    "!" / "$" / "&" / "'" / "(" / ")"
-    / "*" / "+" / "," / ";" / "="
-  description: RFC 3986 subcomponent delimiter.
-ALPHA:
-  syntax: |
-    %x41-5A / %x61-7A
-  description: ASCII letters A-Z or a-z from RFC 5234.
-DIGIT:
-  syntax: |
-    %x30-39
-  description: ASCII digits 0-9 from RFC 5234.
-HEXDIG:
-  syntax: |
-    DIGIT / %x41-46 / %x61-66
-  description: ASCII hexadecimal digit from RFC 5234.
+
+
