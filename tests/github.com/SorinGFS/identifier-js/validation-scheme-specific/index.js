@@ -643,4 +643,74 @@ module.exports = (id) => {
 
     });
 
+    // Verify the RFC 8141 restrictions applied when generic URI/IRI syntax uses the urn scheme.
+    describe('URN scheme grammar', () => {
+        // Accept representative namestring forms through complete URI and IRI operations.
+        test('accepts complete namestring forms', () => {
+            const values = [
+                'urn:example:a123,z456',
+                'URN:EXAMPLE:a123,z456',
+                'urn:ab:a',
+                `urn:a${'b'.repeat(30)}z:nss`,
+                'urn:example:a/b/c',
+                'urn:example:a?+abc',
+                'urn:example:a?=xyz',
+                'urn:example:a?+abc?=xyz',
+                'urn:example:a?+r?x?=q?y',
+                'urn:example:a?=q?+r',
+                'urn:example:a#',
+                'urn:example:a#?/fragment',
+                'urn:example:a?+abc?=xyz#789',
+            ];
+            // Exercise both URI and IRI representations and their reference forms.
+            for (const callback of ['isUri', 'isUriReference', 'isIri', 'isIriReference']) {
+                for (const value of values) assert.equal(id[callback](value), true);
+            }
+        });
+
+        // Keep fragment-free URNs within absolute URI and IRI grammar.
+        test('accepts fragment-free absolute namestrings', () => {
+            for (const callback of ['isAbsoluteUri', 'isAbsoluteIri']) {
+                assert.equal(id[callback]('URN:EXAMPLE:a/b?+abc?=xyz'), true);
+                assertError(() => id[callback]('urn:example:a#fragment'), `Invalid ${callback === 'isAbsoluteUri' ? 'absolute-URI' : 'absolute-IRI'}`);
+            }
+        });
+
+        // Reject generic URI shapes that violate the implemented URN scheme grammar.
+        test('rejects malformed URN scheme syntax', () => {
+            const values = [
+                'urn:a:nss',
+                `urn:a${'b'.repeat(31)}z:nss`,
+                'urn:-ab:nss',
+                'urn:ab-:nss',
+                'urn::nss',
+                'urn:example:',
+                'urn:example:/nss',
+                'urn:example:a?',
+                'urn:example:a?ordinary',
+                'urn:example:a?+',
+                'urn:example:a?+?x',
+                'urn:example:a?+/x',
+                'urn:example:a?=',
+                'urn:example:a?=/x',
+                'urn:example:a?+r?=',
+                'urn://example/a',
+                'urn:example:a?query',
+            ];
+            // Require scheme validation through both generic reference operations.
+            for (const callback of ['isUriReference', 'isIriReference']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError);
+            }
+        });
+
+        // Enforce ASCII and valid percent triplets throughout URN syntax.
+        test('rejects invalid characters and percent encoding', () => {
+            const values = ['urn:example:a[', 'urn:example:a%2', 'urn:example:a%GG', 'urn:example:café', 'urn:example:a?+résolution', 'urn:example:a?=quête', 'urn:example:a#résultat'];
+            // Apply the same character restrictions through URI and IRI operations.
+            for (const callback of ['isUri', 'isIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError);
+            }
+        });
+    });
+
 };

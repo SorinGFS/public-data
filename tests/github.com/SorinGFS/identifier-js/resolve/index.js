@@ -80,6 +80,12 @@ module.exports = (id) => {
         test('Preserves an empty authority component', () => {
             assert.equal(id.resolveReference('uri:///target', 'uri:/base'), 'uri:///target');
         });
+
+        // Keep URN names outside generic hierarchical reference processing.
+        test('Rejects URN bases and references', () => {
+            assert.throws(() => id.resolveReference('', 'urn:example:a'), /URN reference resolution is not supported/);
+            assert.throws(() => id.resolveReference('urn:example:a', 'https://example.com/base'), /URN reference resolution is not supported/);
+        });
     });
 
 };

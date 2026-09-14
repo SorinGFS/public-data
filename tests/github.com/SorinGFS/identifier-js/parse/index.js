@@ -480,4 +480,48 @@ module.exports = (id) => {
         });
     });
 
+    // Verify that scheme-specific URN validation retains generic URI/IRI component output.
+    describe('URN generic component parsing', () => {
+        // Expose the RFC 3986 component boundaries rather than RFC 8141 subcomponents.
+        test('returns generic components for complete URNs', () => {
+            const expected = {
+                scheme: 'URN',
+                authority: undefined,
+                userinfo: undefined,
+                host: undefined,
+                port: undefined,
+                path: 'EXAMPLE:a%62/../c',
+                query: '+r?x?=q?y',
+                fragment: 'f',
+            };
+            // Apply the same component contract through each complete parser.
+            for (const parser of ['parseUri', 'parseUriReference', 'parseIri', 'parseIriReference']) {
+                assertParsedEqual(id[parser]('URN:EXAMPLE:a%62/../c?+r?x?=q?y#f'), expected);
+            }
+        });
+
+        // Preserve generic component boundaries through fragment-free parser operations.
+        test('returns generic components for absolute URNs', () => {
+            const expected = {
+                scheme: 'URN',
+                authority: undefined,
+                userinfo: undefined,
+                host: undefined,
+                port: undefined,
+                path: 'EXAMPLE:a',
+                query: '=q?+r?=still-q',
+            };
+            // Apply the same component contract through both absolute parsers.
+            for (const parser of ['parseAbsoluteUri', 'parseAbsoluteIri']) {
+                assertParsedEqual(id[parser]('URN:EXAMPLE:a?=q?+r?=still-q'), expected);
+            }
+        });
+
+        // Preserve absent and present-empty generic fragment states.
+        test('distinguishes absent and empty URN fragments', () => {
+            assert.equal(id.parseUri('urn:example:a').fragment, undefined);
+            assert.equal(id.parseUri('urn:example:a#').fragment, '');
+        });
+    });
+
 };

@@ -504,4 +504,72 @@ module.exports = (subject) => {
             assert.equal(id.normalize(normalized, { mapRegName }), normalized);
         });
     });
+
+    // Verify scheme-specific normalization from generic URN component fields.
+    describe('parsed normalize URN scheme', () => {
+        // Apply conservative case normalization without changing encoded assigned-name octets.
+        test('normalizes scheme, NID, and percent-triplet case without decoding', () => {
+            const input = 'URN:EXAMPLE:a%62%2c%7e/../B?+r%65s%2f?=q%75ery%2f#fr%61g%2f';
+            const expected = 'urn:example:a%62%2C%7E/../B?+r%65s%2F?=q%75ery%2F#fr%61g%2F';
+            assert.equal(subject.parseUri(input).normalize(), expected);
+        });
+
+        // Keep encoded unreserved NSS octets distinct from literal characters.
+        test('preserves every percent-encoded ASCII unreserved NSS octet', () => {
+            const encoded = '%41%7a%30%2d%2e%5f%7e';
+            assert.equal(subject.parseUri(`urn:example:${encoded}`).normalize(), `urn:example:%41%7A%30%2D%2E%5F%7E`);
+        });
+
+        // Treat NSS slash and dot-segment spelling as opaque assigned-name data.
+        test('preserves NSS dot segments, slash structure, and case', () => {
+            assert.equal(subject.parseUri('URN:EXAMPLE:A/./b/../C').normalize(), 'urn:example:A/./b/../C');
+        });
+
+        // Retain the ASCII URN representation under both transformation options.
+        test('retains URNs for URI and IRI transforms', () => {
+            const parsed = subject.parseIri('URN:EXAMPLE:caf%c3%a9?=q%c3%a9#f%c3%a9');
+            const expected = 'urn:example:caf%C3%A9?=q%C3%A9#f%C3%A9';
+            assert.equal(parsed.normalize({ transform: 'URI' }), expected);
+            assert.equal(parsed.normalize({ transform: 'IRI' }), expected);
+        });
+
+        // Keep authority-specific mapping outside URN normalization.
+        test('does not invoke registered-name mapping', () => {
+            let calls = 0;
+            // Detect any accidental routing through generic host normalization.
+            const mapRegName = (value) => {
+                calls++;
+                return value;
+            };
+            assert.equal(subject.parseIri('URN:EXAMPLE:a').normalize({ mapRegName }), 'urn:example:a');
+            assert.equal(calls, 0);
+        });
+
+        // Read mutable generic fields as the authoritative normalization input.
+        test('reads generic component mutations without modifying them', () => {
+            const parsed = subject.parseUri('urn:example:original?+old-r?=old-q#old-f');
+            parsed.path = 'CHANGED:A%62/../C';
+            parsed.query = '+new%2fr?=new%2fq';
+            parsed.fragment = 'new%2ff';
+            const components = { ...parsed };
+            assert.equal(parsed.normalize(), 'urn:changed:A%62/../C?+new%2Fr?=new%2Fq#new%2Ff');
+            assert.deepEqual({ ...parsed }, components);
+        });
+
+        // Reapply URN grammar after mutable generic fields change.
+        test('rejects component mutations that violate URN syntax', () => {
+            const parsed = subject.parseUri('urn:example:original');
+            parsed.path = 'invalid';
+            assert.throws(() => parsed.normalize(), SyntaxError);
+        });
+
+        // Reach a fixed point while preserving the parser's generic component values.
+        test('is idempotent and leaves components unchanged', () => {
+            const parsed = subject.parseUri('URN:EXAMPLE:a%62/./b?+r%2f?=q%2f#f%2f');
+            const components = { ...parsed };
+            const normalized = parsed.normalize();
+            assert.equal(subject.parseUri(normalized).normalize(), normalized);
+            assert.deepEqual({ ...parsed }, components);
+        });
+    });
 };

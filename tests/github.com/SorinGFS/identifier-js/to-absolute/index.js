@@ -36,6 +36,11 @@ module.exports = (id) => {
         test('Scheme is required', () => {
             assertError(() => id.toAbsoluteReference('//example.com/foo?bar#baz'), 'Invalid IRI: //example.com/foo?bar#baz');
         });
+
+        // Keep URN names outside generic reference conversion.
+        test('URN conversion is not supported', () => {
+            assertError(() => id.toAbsoluteReference('urn:example:a#fragment'), 'URN reference conversion is not supported');
+        });
     });
 
 };
