@@ -100,12 +100,31 @@ module.exports = (id) => {
             assertError(() => id.isUri('https://.example.com'), 'Invalid URI: https://.example.com');
         });
 
-        test('Invalid - trailing dot', () => {
-            assertError(() => id.isUri('https://example.com.'), 'Invalid URI: https://example.com.');
+        // Accept the RFC 3986 DNS form with one terminal root dot for every DNS-host URI scheme.
+        test('Valid - terminal DNS root dot', () => {
+            // Exercise each scheme that specializes registered names as DNS hosts.
+            for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
+                const input = `${scheme}://example.com.:8443/path?query#fragment`;
+                const parsed = id.parseUri(input);
+                assert.equal(id.isUri(input), true);
+                assert.equal(parsed.host, 'example.com.');
+            }
         });
 
-        test('Invalid - consecutive dots', () => {
+        // Reject empty non-root label positions even when one terminal root dot is otherwise allowed.
+        test('Invalid - root-only or consecutive dots', () => {
+            assertError(() => id.isUri('https://.'), 'Invalid URI: https://.');
             assertError(() => id.isUri('https://example..com'), 'Invalid URI: https://example..com');
+            assertError(() => id.isUri('https://example.com..'), 'Invalid URI: https://example.com..');
+        });
+
+        // Apply RFC 1034 DNS size limits to the non-root dotted presentation.
+        test('DNS root dot does not consume the complete-name length limit', () => {
+            const validHost = `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`;
+            const invalidHost = validHost + 'd';
+            assert.equal(validHost.length, 253);
+            assert.equal(id.isUri(`https://${validHost}.`), true);
+            assertError(() => id.isUri(`https://${invalidHost}.`), `Invalid URI: https://${invalidHost}.`);
         });
 
         test('Invalid - unicode character', () => {
@@ -424,12 +443,35 @@ module.exports = (id) => {
             assertError(() => id.isIri('https://.example'), 'Invalid IRI: https://.example');
         });
 
-        test('Invalid - trailing dot', () => {
-            assertError(() => id.isIri('https://example.'), 'Invalid IRI: https://example.');
+        // Accept every UTS #46 label separator as one terminal DNS root marker in an IRI.
+        test('Valid - terminal DNS root separator', () => {
+            // Preserve each parsed separator while exercising every DNS-host IRI scheme.
+            for (const separator of ['.', '\uFF0E', '\u3002', '\uFF61']) {
+                for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
+                    const input = `${scheme}://例子${separator}:8443/path?query#fragment`;
+                    const parsed = id.parseIri(input);
+                    assert.equal(id.isIri(input), true);
+                    assert.equal(parsed.host, `例子${separator}`);
+                }
+            }
         });
 
-        test('Invalid - consecutive dots', () => {
+        // Reject empty non-root label positions for every accepted IRI separator spelling.
+        test('Invalid - root-only or consecutive separators', () => {
+            // Reject every root-marker spelling when it is not preceded by a non-root label.
+            for (const separator of ['.', '\uFF0E', '\u3002', '\uFF61']) {
+                assertError(() => id.isIri(`https://${separator}`), `Invalid IRI: https://${separator}`);
+            }
             assertError(() => id.isIri('https://example..test'), 'Invalid IRI: https://example..test');
+            assertError(() => id.isIri('https://example.。'), 'Invalid IRI: https://example.。');
+        });
+
+        // Keep the optional root marker outside the DNS presentation-length boundary.
+        test('DNS root separator does not consume the complete-name length limit', () => {
+            const validHost = `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`;
+            const invalidHost = validHost + 'd';
+            assert.equal(id.isIri(`https://${validHost}。`), true);
+            assertError(() => id.isIri(`https://${invalidHost}。`), `Invalid IRI: https://${invalidHost}。`);
         });
 
         test('Invalid - emoji in label', () => {
