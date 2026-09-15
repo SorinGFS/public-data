@@ -10,7 +10,7 @@ const os = require('node:os');
 const path = require('node:path');
 const SharedHttpCache = require('../../../index.js');
 
-// Run one test against an isolated local origin and remove every temporary resource afterward.f
+// Run one test against an isolated local origin and remove every temporary resource afterward.
 async function withEnvironment(handler, options, operation) {
     const cacheDir = await fs.mkdtemp(path.join(os.tmpdir(), 'shared-http-cache-test-'));
     const server = http.createServer(handler);
