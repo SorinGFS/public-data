@@ -1,5 +1,5 @@
 {
-    "description": "valid email hostname with newly assigned U+A7F1 MODIFIER LETTER CAPITAL S mapped to ASCII s",
+    "description": "invalid strict U-label with U+A7F1 MODIFIER LETTER CAPITAL S requiring compatibility mapping",
     "data": "a@\uA7F1",
-    "valid": true
+    "valid": false
 }

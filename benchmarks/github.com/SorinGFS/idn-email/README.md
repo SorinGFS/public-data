@@ -1,6 +1,6 @@
 # Public benchmark layout
 
-This directory is the single entry point for the materialized benchmark suite. It registers isolated package loading plus four representative function scenarios across both package exports.
+This directory is the single entry point for the materialized benchmark suite. It registers isolated package loading plus six representative function scenarios across both package exports.
 
 Run the standard workload with:
 
@@ -25,9 +25,9 @@ The coordinator is shared unchanged with other packages. It uses explicit concer
   README.md
   _load-time/
     index.js
-  idn-email/
+  idn-email-address/
     index.js
-  is-idn-email/
+  is-idn-email-address/
     index.js
 ```
 
@@ -38,10 +38,12 @@ Within each eligible version layer, nonversion concern directories are loaded le
 The suite measures:
 
 - isolated package entry-point loading;
-- `isIdnEmail("user@example.com")`;
-- `isIdnEmail("δοκιμή@mañana.example")`;
-- `idnEmail("user@example.com")`;
-- `idnEmail("δοκιμή@mañana.example")`.
+- `isIdnEmailAddress("user@example.com")`;
+- `isIdnEmailAddress("δοκιμή@example.com")`;
+- `isIdnEmailAddress("δοκιμή@mañana.example")`;
+- `idnEmailAddress("user@example.com")`;
+- `idnEmailAddress("δοκιμή@example.com")`;
+- `idnEmailAddress("δοκιμή@mañana.example")`.
 
 A function concern registers a named package callback and JSON-serializable arguments:
 
@@ -50,7 +52,7 @@ A function concern registers a named package callback and JSON-serializable argu
 // Register representative validation measurements.
 module.exports = (_subject, { benchmark }) => {
     benchmark({
-        callback: 'isIdnEmail',
+        callback: 'isIdnEmailAddress',
         args: ['user@example.com'],
     });
 };

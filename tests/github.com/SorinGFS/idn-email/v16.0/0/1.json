@@ -1,5 +1,5 @@
 {
-    "description": "valid email hostname with newly assigned U+1C89 CYRILLIC CAPITAL LETTER TJE mapped to U+1C8A",
+    "description": "invalid strict U-label with U+1C89 CYRILLIC CAPITAL LETTER TJE requiring lowercase mapping",
     "data": "a@\u1C89",
-    "valid": true
+    "valid": false
 }
