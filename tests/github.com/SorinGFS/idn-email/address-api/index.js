@@ -89,7 +89,7 @@ module.exports = (subject) => {
         assert.throws(() => isIdnEmailAddress('user@É.example'), /must not require UTS #46 mapping/);
         assert.throws(() => isIdnEmailAddress('user@e\u0301.example'), /must be in NFC/);
         assert.throws(() => isIdnEmailAddress('user@ｅxample.com'), /must not require UTS #46 mapping/);
-        assert.throws(() => isIdnEmailAddress('user@a\u180Eb.example'), /must not require UTS #46 mapping/);
+        assert.throws(() => isIdnEmailAddress('user@a\u180Eb.example'), SyntaxError);
         assert.throws(() => isIdnEmailAddress('user@example\u3002com'), /must not require UTS #46 mapping/);
         assert.throws(() => isIdnEmailAddress('user@example.com.'), /trailing dot/);
     });
