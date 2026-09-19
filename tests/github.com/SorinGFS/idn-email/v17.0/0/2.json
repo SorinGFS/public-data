@@ -1,5 +1,5 @@
 {
-    "description": "valid email hostname with newly assigned U+A7CE LATIN CAPITAL LETTER PHARYNGEAL VOICED FRICATIVE mapped to U+A7CF",
+    "description": "invalid strict U-label with U+A7CE LATIN CAPITAL LETTER PHARYNGEAL VOICED FRICATIVE requiring lowercase mapping",
     "data": "a@\uA7CE",
-    "valid": true
+    "valid": false
 }

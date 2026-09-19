@@ -1,5 +1,5 @@
 {
-    "description": "valid email hostname with newly assigned U+1CCD6 OUTLINED LATIN CAPITAL LETTER A mapped to ASCII a",
+    "description": "invalid strict U-label with U+1CCD6 OUTLINED LATIN CAPITAL LETTER A requiring compatibility mapping",
     "data": "a@\uD833\uDCD6",
-    "valid": true
+    "valid": false
 }

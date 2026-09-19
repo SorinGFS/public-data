@@ -1,4 +1,4 @@
 {
-  "callback": "isIdnEmail",
+  "callback": "isIdnEmailAddress",
   "backwardsCompatible": true
 }

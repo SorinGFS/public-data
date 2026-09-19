@@ -20,6 +20,7 @@ The structure is suitable for local and CI use because it has one package comman
 #/public/tests/
   index.js
   index.json
+  address-api/   # replacement API and repaired SMTP mailbox behavior
   v15.1/
     0/             # 41 initial fixtures
   v16.0/
@@ -28,19 +29,19 @@ The structure is suitable for local and CI use because it has one package comman
     0/             # 7 Unicode 17 additions
 ```
 
-`index.json` selects `isIdnEmail` and declares its numeric fixture contract backwards compatible. The active totals are therefore:
+`index.json` selects `isIdnEmailAddress` and declares its numeric fixture contract cumulative across release lines. The active totals are therefore:
 
-- `15.1.x`: 41 fixtures;
-- `16.0.x`: 48 fixtures;
-- `17.0.x`: 55 fixtures.
+- `15.1.x`: 41 numeric fixtures plus 13 address API scenarios, for 54 tests;
+- `16.0.x`: 48 numeric fixtures plus 13 address API scenarios, for 61 tests;
+- `17.0.x`: 55 numeric fixtures plus 13 address API scenarios, for 68 tests.
 
-Each numbered JSON fixture is registered as an independent `node:test` case.
+Each numbered JSON fixture and each root concern scenario is registered as an independent `node:test` case.
 
 ## Version layers
 
 The dispatcher always includes the root and, by default, discovers matching major, major/minor, and eligible complete semantic-version layers. Because `index.json.backwardsCompatible` is `true`, numeric fixture layers accumulate across major versions when their normalized introduction point is not newer than the package version. Omitted components are zero, so `v15.1` means `15.1.0`. Layers run in ascending semantic order, with shorter equal versions first.
 
-The setting applies only to numeric fixtures executed through `isIdnEmail`. Explicit nonnumeric concern suites retain exact-scope version selection.
+The setting applies only to numeric fixtures executed through `isIdnEmailAddress`. Explicit nonnumeric concern suites retain exact-scope version selection.
 
 Within every eligible layer, numeric directories and their numbered JSON files run numerically before nonnumeric concern directories run lexically. Loose files, nonnumeric fixture filenames, and directories without `index.js` are ignored.
 
@@ -56,7 +57,7 @@ A numbered fixture has this shape:
 }
 ```
 
-For `"valid": true`, `isIdnEmail(data)` must return `true`. For `"valid": false`, it must throw. The dispatcher validates required fields and reports the source layer, directory, filename, and description in each test name.
+For `"valid": true`, `isIdnEmailAddress(data)` must return `true`. For `"valid": false`, it must throw. The dispatcher validates required fields and reports the source layer, directory, filename, and description in each test name.
 
 ## Explicit concerns
 
@@ -69,7 +70,7 @@ const { test } = require('node:test');
 
 module.exports = (subject) => {
     test('exposes the expected behavior', () => {
-        assert.equal(subject.isIdnEmail('user@example.com'), true);
+        assert.equal(subject.isIdnEmailAddress('user@example.com'), true);
     });
 };
 ```
