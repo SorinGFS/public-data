@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { test } = require('node:test');
+const { suite, test } = require('node:test');
 const {
     discoverConcernEntryPoints,
     discoverNumberedJsonFixtures,
@@ -37,6 +37,20 @@ for (const descriptor of discoverConcernEntryPoints(layerSets.exact)) {
     concernsByLayer.get(descriptor.layer).push(descriptor);
 }
 let fixtureCallback;
+const collectionDescriptions = new Map();
+
+// Load each collection description once for stable, contextual numeric-test labels.
+const getCollectionDescription = (descriptor) => {
+    const collectionRoot = path.dirname(descriptor.path);
+    if (!collectionDescriptions.has(collectionRoot)) {
+        const schemaPath = path.join(collectionRoot, 'schema.json');
+        assert.ok(fs.existsSync(schemaPath), `${descriptor.id} requires a collection schema.json.`);
+        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+        assert.equal(typeof schema.description, 'string', `${descriptor.id} collection schema.json must have a string description.`);
+        collectionDescriptions.set(collectionRoot, schema.description);
+    }
+    return collectionDescriptions.get(collectionRoot);
+};
 
 // Resolve the configured package callback only when numeric fixtures require it.
 const getFixtureCallback = () => {
@@ -51,18 +65,31 @@ const getFixtureCallback = () => {
 
 // Preserve semantic layer order, registering numeric fixtures before explicit concerns within each layer.
 for (const layer of fixtureLayers) {
-    // Register every selected numbered fixture independently through the configured package callback.
+    const fixturesByCollection = new Map();
+
+    // Retain numeric collection order while grouping each collection as one test suite.
     for (const descriptor of fixturesByLayer.get(layer.name)) {
-        const fixture = JSON.parse(fs.readFileSync(descriptor.path, 'utf8'));
-        const description = typeof fixture.description === 'string' ? fixture.description : 'invalid fixture description';
-        const label = `${descriptor.id} / ${description}`;
-        const callback = getFixtureCallback();
-        test(label, () => {
-            assert.equal(typeof fixture.description, 'string', `${descriptor.id} must have a description.`);
-            assert.ok(Object.hasOwn(fixture, 'data'), `${descriptor.id} must have data.`);
-            assert.equal(typeof fixture.valid, 'boolean', `${descriptor.id} must have a boolean valid result.`);
-            if (fixture.valid) assert.equal(callback(fixture.data), true, label);
-            else assert.throws(() => callback(fixture.data), undefined, label);
+        if (!fixturesByCollection.has(descriptor.collection)) fixturesByCollection.set(descriptor.collection, []);
+        fixturesByCollection.get(descriptor.collection).push(descriptor);
+    }
+
+    // Register every collection description as a suite containing its independently reported fixtures.
+    for (const descriptors of fixturesByCollection.values()) {
+        suite(`${getCollectionDescription(descriptors[0])}:`, () => {
+            for (const descriptor of descriptors) {
+                const fixture = JSON.parse(fs.readFileSync(descriptor.path, 'utf8'));
+                const description = typeof fixture.description === 'string' ? fixture.description : 'invalid fixture description';
+                const fixturePath = path.relative(packageRoot, descriptor.path).split(path.sep).join('/');
+                const label = `${fixturePath} / ${description}`;
+                const callback = getFixtureCallback();
+                test(label, () => {
+                    assert.equal(typeof fixture.description, 'string', `${fixturePath} must have a description.`);
+                    assert.ok(Object.hasOwn(fixture, 'data'), `${fixturePath} must have data.`);
+                    assert.equal(typeof fixture.valid, 'boolean', `${fixturePath} must have a boolean valid result.`);
+                    if (fixture.valid) assert.equal(callback(fixture.data), true, label);
+                    else assert.throws(() => callback(fixture.data), undefined, label);
+                });
+            }
         });
     }
 
