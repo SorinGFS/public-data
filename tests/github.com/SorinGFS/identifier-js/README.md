@@ -84,15 +84,17 @@ Every numbered JSON fixture is registered as an independent `node:test` case.
 
 ## Numeric JSON fixtures
 
-A numbered fixture has this shape:
+Each numeric suite contains a `schema.json` whose `description` supplies its report heading. A numbered fixture has this shape:
 
 ```json
 {
-  "description": "rejects a non-string value",
+  "description": "invalid non-string value",
   "data": 12,
   "valid": false
 }
 ```
+
+Required properties appear in `description`, `data`, `valid` order; auxiliary metadata follows `valid`. Each description starts with lowercase `valid` or `invalid` matching the Boolean result.
 
 When an eligible numeric directory exists, `#/public/tests/index.json` must select a named function exported by the package:
 
@@ -107,7 +109,7 @@ The callback contract is:
 - for `"valid": true`, calling the function with `data` must return `true` without throwing;
 - for `"valid": false`, calling the function with `data` must throw.
 
-The dispatcher verifies the fixture fields and reports the layer, collection, fixture filename, and description in the test name.
+The dispatcher reports each numeric suite as `<schema description> (<package-root-relative schema path>):` and each child as `<package-root-relative fixture path> / <fixture description>`.
 
 ## Nonnumeric suites
 
@@ -127,11 +129,11 @@ module.exports = (subject) => {
 
 `subject` is the package API loaded once through the package's declared entry point. Suites must use this argument instead of hardcoding a relative path to the package root.
 
-A suite may also accept dispatcher context. The supplied `describe` wrapper appends the package-root-relative concern path to each suite description:
+A suite may also accept dispatcher context. The supplied `suite` wrapper appends the package-root-relative concern path to each suite description:
 
 ```js
-module.exports = (subject, { describe, layer, packageRoot, testsRoot }) => {
-    describe('expected behavior', () => {
+module.exports = (subject, { suite, layer, packageRoot, testsRoot }) => {
+    suite('expected behavior', () => {
         // Register tests for this concern and eligible layer.
     });
 };
@@ -141,4 +143,4 @@ Suite entry points register tests; they do not need to run a separate test runne
 
 ## Failure behavior
 
-The command exits unsuccessfully when fixture configuration is missing or invalid, a selected callback is unavailable, a suite entry point does not export a registration function, a test fails, or loading a test module throws.
+The command exits unsuccessfully when fixture configuration is missing or invalid, a selected callback is unavailable, a suite entry point does not export a registration function, a test fails, or loading a test module throws. Routine fixture mismatches report only their actual and expected outcomes; structural failures retain full diagnostics.

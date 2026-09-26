@@ -3,11 +3,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Match Vitest's Error-subclass and message-content checks.
     const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
-    describe('isUUID', () => {
+    suite('isUUID', () => {
         test('valid UUID with lowercase hex digits', () => {
             assert.equal(id.isUUID('123e4567-e89b-42d3-9456-426614174000'), true);
         });
@@ -73,7 +73,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUUIDv4', () => {
+    suite('isUUIDv4', () => {
         test('valid UUID v4 with lowercase hex digits', () => {
             assert.equal(id.isUUIDv4('123e4567-e89b-42d3-9456-426614174000'), true);
         });
@@ -127,7 +127,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUri', () => {
+    suite('isUri', () => {
         test('Full', () => {
             assert.equal(id.isUri('https://jason@example.com:80/foo?bar#baz'), true);
         });
@@ -153,7 +153,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUriReference', () => {
+    suite('isUriReference', () => {
         test('Full', () => {
             assert.equal(id.isUriReference('https://jason@example.com:80/foo?bar#baz'), true);
         });
@@ -187,7 +187,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isAbsoluteUri', () => {
+    suite('isAbsoluteUri', () => {
         test('Full', () => {
             assert.equal(id.isAbsoluteUri('https://jason@example.com:80/foo?bar'), true);
         });
@@ -205,7 +205,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isIri', () => {
+    suite('isIri', () => {
         test('Full', () => {
             assert.equal(id.isIri('http://jásón@examplé.org:80/rosé?fóo#bár'), true);
         });
@@ -231,7 +231,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isIriReference', () => {
+    suite('isIriReference', () => {
         test('Full', () => {
             assert.equal(id.isIriReference('http://jásón@examplé.org:80/rosé?fóo#bár'), true);
         });
@@ -265,7 +265,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isAbsoluteIri', () => {
+    suite('isAbsoluteIri', () => {
         test('Full', () => {
             assert.equal(id.isAbsoluteIri('http://jásón@examplé.org:80/rosé?fóo'), true);
         });

@@ -3,7 +3,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
 
     // Verify reference resolution behavior beyond the RFC's published examples.
     const resolveTests = [
@@ -11,7 +11,7 @@ module.exports = (id, { describe }) => {
         ['example:some:ip:prop', 'example:some:other:prop', 'example:some:ip:prop'],
     ];
 
-    describe('resolveReference', () => {
+    suite('resolveReference', () => {
         // Register each project-specific reference case as an independently reported test.
         resolveTests.forEach(([reference, base, expected]) => {
             test(`resolveReference('${reference}', '${base}') === '${expected}'`, () => {

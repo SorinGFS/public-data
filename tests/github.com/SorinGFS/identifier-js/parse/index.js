@@ -3,14 +3,14 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Match Vitest's structural equality without requiring identical object prototypes.
     const assertParsedEqual = (actual, expected) => assert.deepEqual({ ...actual }, expected);
 
     // Match Vitest's Error-subclass and message-content checks.
     const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
-    describe('parseUri', () => {
+    suite('parseUri', () => {
         test('Full', () => {
             assertParsedEqual(id.parseUri('https://jason@example.com:80/foo?bar#baz'), {
                 scheme: 'https',
@@ -85,7 +85,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUriReference', () => {
+    suite('isUriReference', () => {
         test('Full', () => {
             assertParsedEqual(id.parseUriReference('https://jason@example.com:80/foo?bar#baz'), {
                 scheme: 'https',
@@ -208,7 +208,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isAbsoluteUri', () => {
+    suite('isAbsoluteUri', () => {
         test('Full', () => {
             assertParsedEqual(id.parseAbsoluteUri('https://jason@example.com:80/foo?bar'), {
                 scheme: 'https',
@@ -234,7 +234,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('parseIri', () => {
+    suite('parseIri', () => {
         test('Full', () => {
             assertParsedEqual(id.parseIri('http://jásón@examplé.org:80/rosé?fóo#bár'), {
                 scheme: 'http',
@@ -309,7 +309,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('parseIriReference', () => {
+    suite('parseIriReference', () => {
         test('Full', () => {
             assertParsedEqual(id.parseIriReference('http://jásón@examplé.org:80/rosé?fóo#bár'), {
                 scheme: 'http',
@@ -454,7 +454,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('parseAbsoluteIri', () => {
+    suite('parseAbsoluteIri', () => {
         test('Full', () => {
             assertParsedEqual(id.parseAbsoluteIri('http://jásón:jásón@examplé.org:80/rosé?fóo'), {
                 scheme: 'http',
@@ -481,7 +481,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Verify that scheme-specific URN validation retains generic URI/IRI component output.
-    describe('URN generic component parsing', () => {
+    suite('URN generic component parsing', () => {
         // Expose the RFC 3986 component boundaries rather than RFC 8141 subcomponents.
         test('returns generic components for complete URNs', () => {
             const expected = {
