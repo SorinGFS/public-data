@@ -127,11 +127,13 @@ module.exports = (subject) => {
 
 `subject` is the package API loaded once through the package's declared entry point. Suites must use this argument instead of hardcoding a relative path to the package root.
 
-A suite may also accept dispatcher context:
+A suite may also accept dispatcher context. The supplied `describe` wrapper appends the package-root-relative concern path to each suite description:
 
 ```js
-module.exports = (subject, { layer, packageRoot, testsRoot }) => {
-    // Register tests for this concern and eligible layer.
+module.exports = (subject, { describe, layer, packageRoot, testsRoot }) => {
+    describe('expected behavior', () => {
+        // Register tests for this concern and eligible layer.
+    });
 };
 ```
 
