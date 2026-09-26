@@ -1,5 +1,5 @@
 {
-    "description": "single ideographic full stop",
+    "description": "invalid: single ideographic full stop",
     "data": "。",
     "valid": false
 }

@@ -93,7 +93,7 @@ const validateMetadata = (metadata) => {
 };
 
 // Register official vectors after applying the package's documented stricter-policy exclusions.
-module.exports = (subject, concernRoot, metadata) => {
+module.exports = (subject, concernRoot, metadata, { suite }) => {
     validateMetadata(metadata);
     const testFile = path.join(concernRoot, 'IdnaTestV2.txt');
     const mappingFile = path.join(concernRoot, 'IdnaMappingTable.txt');
@@ -107,6 +107,7 @@ module.exports = (subject, concernRoot, metadata) => {
     const excludedCodePoints = readComparisonExclusions(mappingFile);
     const records = parseIdnaTests(testFile);
     const summary = { applicable: 0, nv8OrXv8: 0 };
+    const applicableRecords = [];
 
     // Classify each vector before registering only those applicable to this package's policy.
     for (const record of records) {
@@ -134,17 +135,23 @@ module.exports = (subject, concernRoot, metadata) => {
         const expectation = expectedValid
             ? 'valid nontransitional ToASCII'
             : `invalid nontransitional ToASCII (${rejectionReasons.join(', ')})`;
-
-        // Exercise validation and conversion together while reporting every vector independently.
-        test(`IdnaTestV2.txt:${record.lineNumber} / ${expectation}`, () => {
-            if (expectedValid) {
-                assert.equal(subject.isIdnHostname(record.source), true);
-                assert.equal(subject.idnHostname(record.source), record.toAsciiN);
-            } else {
-                assert.throws(() => subject.isIdnHostname(record.source));
-                assert.throws(() => subject.idnHostname(record.source));
-            }
-        });
+        applicableRecords.push({ expectation, expectedValid, record });
     }
     assert.deepEqual(summary, metadata.expectedSummary, 'Applicable IdnaTestV2 vector inventory changed.');
+
+    // Group every applicable vector under its version-local concern source path.
+    suite(`Unicode ${sourceVersion} IdnaTestV2 conformance`, () => {
+        for (const { expectation, expectedValid, record } of applicableRecords) {
+            // Exercise validation and conversion together while reporting every vector independently.
+            test(`IdnaTestV2.txt:${record.lineNumber} / ${expectation}`, () => {
+                if (expectedValid) {
+                    assert.equal(subject.isIdnHostname(record.source), true);
+                    assert.equal(subject.idnHostname(record.source), record.toAsciiN);
+                } else {
+                    assert.throws(() => subject.isIdnHostname(record.source));
+                    assert.throws(() => subject.idnHostname(record.source));
+                }
+            });
+        }
+    });
 };

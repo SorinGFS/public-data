@@ -1,5 +1,5 @@
 {
-    "description": "Bidi Rule 5 — pass: starts L and contains EN (allowed)",
+    "description": "valid: Bidi Rule 5 — pass: starts L and contains EN (allowed)",
     "data": "g1",
     "valid": true
 }

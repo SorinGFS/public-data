@@ -1,5 +1,5 @@
 {
-    "description": "single dot",
+    "description": "invalid: single dot",
     "data": ".",
     "valid": false
 }

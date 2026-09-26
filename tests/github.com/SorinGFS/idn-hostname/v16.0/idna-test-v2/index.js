@@ -4,4 +4,4 @@ const registerIdnaTestV2 = require('../../idnaTestV2.js');
 const metadata = require('./IdnaTestV2.json');
 
 // Supply version-local files and generated expectations to the shared registrar.
-module.exports = (subject) => registerIdnaTestV2(subject, __dirname, metadata);
+module.exports = (subject, options) => registerIdnaTestV2(subject, __dirname, metadata, options);

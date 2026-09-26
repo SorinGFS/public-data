@@ -1,5 +1,5 @@
 {
-    "description": "halfwidth ideographic full stop as label separator",
+    "description": "valid: halfwidth ideographic full stop as label separator",
     "data": "a｡b",
     "valid": true
 }
