@@ -1,5 +1,5 @@
 {
-    "description": "invalid idn e-mail without TLD",
+    "description": "valid IDN email without a top-level domain",
     "data": "user@localhost",
     "valid": true
 }
