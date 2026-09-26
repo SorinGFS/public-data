@@ -80,9 +80,17 @@ For every eligible layer, the dispatcher:
 2. processes numbered JSON fixtures in each numeric directory in numeric order;
 3. loads nonnumeric suite directories in lexical order.
 
-Every numbered JSON fixture is registered as an independent `node:test` case.
+Every numeric collection is registered as a `node:test` suite named by its schema description, and every numbered JSON fixture is registered as an independent case in that suite.
 
 ## Numeric JSON fixtures
+
+Each numeric collection contains a `schema.json` whose `description` supplies the collection description:
+
+```json
+{
+  "description": "dry validation related tests only"
+}
+```
 
 A numbered fixture has this shape:
 
@@ -107,7 +115,7 @@ The callback contract is:
 - for `"valid": true`, calling the function with `data` must return `true` without throwing;
 - for `"valid": false`, calling the function with `data` must throw.
 
-The dispatcher verifies the fixture fields and reports the layer, collection, fixture filename, and description in the test name.
+The dispatcher verifies the fixture fields. It reports the collection schema description as the suite name and the package-root-relative fixture path followed by the fixture description as the test name.
 
 ## Nonnumeric suites
 
@@ -136,6 +144,8 @@ module.exports = (subject, { layer, packageRoot, testsRoot }) => {
 ```
 
 Suite entry points register tests; they do not need to run a separate test runner.
+
+The `uritemplate-test` concern registers each named source group as a suite. Its heading uses `<group description> (<package-root-relative JSON source path>):`, and each child test uses the template input as its description.
 
 ## Failure behavior
 

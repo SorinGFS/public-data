@@ -1,4 +1,4 @@
 {
-    "$comment": "dry validation related tests only",
+    "description": "dry validation related tests only",
     "$ref": "#/#/#/#/uri-template"
 }
