@@ -47,7 +47,7 @@ Within every eligible layer, numeric directories and their numbered JSON files r
 
 ## Numeric fixtures
 
-A numbered fixture has this shape:
+Each numeric suite contains a `schema.json` whose `description` supplies its report heading. A numbered fixture has this shape:
 
 ```json
 {
@@ -57,7 +57,9 @@ A numbered fixture has this shape:
 }
 ```
 
-For `"valid": true`, `isIdnEmailAddress(data)` must return `true`. For `"valid": false`, it must throw. The dispatcher validates required fields and reports the source layer, directory, filename, and description in each test name.
+Required properties appear in `description`, `data`, `valid` order; auxiliary metadata follows `valid`. Each description starts with lowercase `valid` or `invalid` matching the Boolean result.
+
+For `"valid": true`, `isIdnEmailAddress(data)` must return `true`. For `"valid": false`, it must throw. The dispatcher reports each numeric suite as `<schema description> (<package-root-relative schema path>):` and each child as `<package-root-relative fixture path> / <fixture description>`.
 
 ## Explicit concerns
 
@@ -75,4 +77,8 @@ module.exports = (subject) => {
 };
 ```
 
-The optional second argument supplies `layer`, `packageRoot`, and `testsRoot`. Concerns must use the injected API rather than hardcoding a package-relative import.
+The optional second argument supplies `layer`, `packageRoot`, `suite`, and `testsRoot`. The path-aware `suite` wrapper appends the concern entry-point path to its heading. Concerns must use the injected API rather than hardcoding a package-relative import.
+
+## Failure behavior
+
+Routine fixture mismatches report only their actual and expected outcomes. Configuration, fixture-structure, loading, and direct concern failures retain full diagnostics.
