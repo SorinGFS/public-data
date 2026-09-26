@@ -39,12 +39,12 @@ The suite measures:
 
 - isolated package entry-point loading;
 - `isUrlTemplate` validation of a simple path and a complex query expression;
-- `inspect` AST construction for the same representative forms;
-- validated `parseTemplate` expander construction for simple and composite templates;
-- unvalidated `compile` expander construction for simple and composite templates;
-- `recursiveCompile` direct and multi-pass expansion.
+- `inspectUrlTemplate` AST construction for the same representative forms;
+- validated `parseUrlTemplate` expander construction for simple and composite templates;
+- unvalidated `compileUrlTemplate` expander construction for simple and composite templates;
+- `recursiveCompileUrlTemplate` direct and multi-pass expansion.
 
-`parseTemplate` and `compile` return expander objects, so their scenarios measure creation of those objects. `recursiveCompile` provides complete expansion measurements through a named package export. The returned values are consumed by the harness but are not included in measured output formatting.
+`parseUrlTemplate` and `compileUrlTemplate` return expander objects, so their scenarios measure creation of those objects. `recursiveCompileUrlTemplate` provides complete expansion measurements through a named package export. The returned values are consumed by the harness but are not included in measured output formatting.
 
 A concern registers a named package callback and JSON-serializable arguments:
 

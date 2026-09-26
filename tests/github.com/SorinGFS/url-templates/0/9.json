@@ -1,5 +1,5 @@
 {
-    "description": "invalid empty key",
+    "description": "invalid expression using the comma operator reserved for future extensions",
     "data": "{,foo}",
     "valid": false
 }

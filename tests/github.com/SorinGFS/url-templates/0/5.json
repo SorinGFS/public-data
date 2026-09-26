@@ -1,5 +1,5 @@
 {
-    "description": "invalid prefix length (too large number)",
-    "data": "{foo:12345}",
+    "description": "invalid prefix length at the first value above 9999",
+    "data": "{foo:10000}",
     "valid": false
 }

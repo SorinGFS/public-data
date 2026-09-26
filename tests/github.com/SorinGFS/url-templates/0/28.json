@@ -1,0 +1,5 @@
+{
+    "description": "valid prefix length at the upper boundary",
+    "data": "{var:9999}",
+    "valid": true
+}

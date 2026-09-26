@@ -1,0 +1,5 @@
+{
+    "description": "valid percent-encoded triplet in a literal",
+    "data": "x%20y/{var}",
+    "valid": true
+}
