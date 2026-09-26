@@ -88,15 +88,17 @@ Every numbered JSON fixture is registered as an independent `node:test` case.
 
 ## Numeric JSON fixtures
 
-A numbered fixture has this shape:
+Each numeric suite contains a `schema.json` whose `description` supplies its report heading. A numbered fixture has this shape:
 
 ```json
 {
-  "description": "rejects a non-string value",
+  "description": "invalid non-string value",
   "data": 12,
   "valid": false
 }
 ```
+
+Required properties appear in `description`, `data`, `valid` order; auxiliary metadata follows `valid`. Each description starts with lowercase `valid` or `invalid` matching the Boolean result.
 
 When an eligible numeric directory exists, `#/public/tests/index.json` must select a named function exported by the package:
 
@@ -114,7 +116,7 @@ The callback contract is:
 
 `backwardsCompatible` is optional and defaults to `false`. It must be a boolean. Set it to `true` only when older valid/invalid callback expectations remain applicable to newer package versions; this allows each version folder to contain only newly introduced numeric fixtures. The setting applies only to numeric fixtures executed through the selected callback, not to explicit concern suites.
 
-The dispatcher verifies the fixture fields and reports the layer, collection, fixture filename, and description in the test name.
+The dispatcher reports each numeric suite as `<schema description> (<package-root-relative schema path>):` and each child as `<package-root-relative fixture path> / <fixture description>`.
 
 ## Nonnumeric suites
 
@@ -137,8 +139,10 @@ module.exports = (subject) => {
 A suite may also accept dispatcher context:
 
 ```js
-module.exports = (subject, { layer, packageRoot, testsRoot }) => {
-    // Register tests for this concern and eligible layer.
+module.exports = (subject, { layer, packageRoot, suite, testsRoot }) => {
+    suite('expected behavior', () => {
+        // Register tests for this concern and eligible layer.
+    });
 };
 ```
 
@@ -146,4 +150,4 @@ Suite entry points register tests; they do not need to run a separate test runne
 
 ## Failure behavior
 
-The command exits unsuccessfully when fixture configuration is missing or invalid, a selected callback is unavailable, a suite entry point does not export a registration function, a test fails, or loading a test module throws.
+The command exits unsuccessfully when fixture configuration is missing or invalid, a selected callback is unavailable, a suite entry point does not export a registration function, a test fails, or loading a test module throws. Routine fixture mismatches report only their actual and expected outcomes; structural failures retain full diagnostics.

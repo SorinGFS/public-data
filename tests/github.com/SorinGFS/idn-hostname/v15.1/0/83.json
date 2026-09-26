@@ -1,5 +1,5 @@
 {
-    "description": "Bidi Rule 6 — pass: starts L and ends with L",
+    "description": "valid: Bidi Rule 6 — pass: starts L and ends with L",
     "data": "gk",
     "valid": true
 }

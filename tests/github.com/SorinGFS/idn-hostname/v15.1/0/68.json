@@ -1,5 +1,5 @@
 {
-    "description": "Bidi Rule 2 — pass: starts AL and uses allowed classes (AL, AN)",
+    "description": "valid: Bidi Rule 2 — pass: starts AL and uses allowed classes (AL, AN)",
     "data": "ا١",
     "valid": true
 }

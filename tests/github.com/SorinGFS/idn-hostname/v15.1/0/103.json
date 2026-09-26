@@ -1,5 +1,5 @@
 {
-    "description": "GREEK KERAIA followed immediately by a non-Greek combining mark is invalid",
+    "description": "invalid: GREEK KERAIA followed immediately by a non-Greek combining mark is invalid",
     "data": "α͵́β",
     "valid": false
 }

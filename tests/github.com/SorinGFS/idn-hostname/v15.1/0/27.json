@@ -1,6 +1,6 @@
 {
-    "description": "Begins with a Spacing Combining Mark",
-    "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+    "description": "invalid: Begins with a Spacing Combining Mark",
     "data": "ःhello",
-    "valid": false
+    "valid": false,
+    "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2"
 }

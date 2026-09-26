@@ -1,5 +1,5 @@
 {
-    "description": "single fullwidth full stop",
+    "description": "invalid: single fullwidth full stop",
     "data": "．",
     "valid": false
 }

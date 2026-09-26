@@ -1,5 +1,5 @@
 {
-    "description": "Bidi Rule 1 — L-branch pass: label starts with L and contains L",
+    "description": "valid: Bidi Rule 1 — L-branch pass: label starts with L and contains L",
     "data": "gk",
     "valid": true
 }
