@@ -1,5 +1,5 @@
 'use strict';
-// Dispatch numeric fixtures and explicit concern suites across eligible package-version layers.
+// Dispatch numeric fixture suites and explicit concern suites across eligible package-version layers.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -37,20 +37,6 @@ for (const descriptor of discoverConcernEntryPoints(layerSets.exact)) {
     concernsByLayer.get(descriptor.layer).push(descriptor);
 }
 let fixtureCallback;
-const collectionDescriptions = new Map();
-
-// Load each collection description once for stable, contextual numeric-test labels.
-const getCollectionDescription = (descriptor) => {
-    const collectionRoot = path.dirname(descriptor.path);
-    if (!collectionDescriptions.has(collectionRoot)) {
-        const schemaPath = path.join(collectionRoot, 'schema.json');
-        assert.ok(fs.existsSync(schemaPath), `${descriptor.id} requires a collection schema.json.`);
-        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-        assert.equal(typeof schema.description, 'string', `${descriptor.id} collection schema.json must have a string description.`);
-        collectionDescriptions.set(collectionRoot, schema.description);
-    }
-    return collectionDescriptions.get(collectionRoot);
-};
 
 // Resolve the configured package callback only when numeric fixtures require it.
 const getFixtureCallback = () => {
@@ -63,31 +49,66 @@ const getFixtureCallback = () => {
     return fixtureCallback;
 };
 
-// Preserve semantic layer order, registering numeric fixtures before explicit concerns within each layer.
-for (const layer of fixtureLayers) {
-    const fixturesByCollection = new Map();
+// Throw one-line diagnostics for routine callback mismatches already identified by the test label.
+const failFixture = (actual, expected) => {
+    const error = new Error(`actual: ${actual}; expected: ${expected}`);
+    error.stack = undefined;
+    throw error;
+};
 
-    // Retain numeric collection order while grouping each collection as one test suite.
+// Apply the shared callback contract while retaining full diagnostics for fixture-structure failures.
+const assertFixtureResult = (callback, fixture) => {
+    let actual;
+    let thrown;
+    try {
+        actual = callback(fixture.data);
+    } catch (error) {
+        thrown = error;
+    }
+    if (fixture.valid) {
+        if (thrown) failFixture(`threw ${thrown.name ?? 'Error'}: ${thrown.message ?? String(thrown)}`, 'true');
+        if (actual !== true) failFixture(String(actual), 'true');
+        return;
+    }
+    if (!thrown) failFixture(`returned ${String(actual)}`, 'throw');
+};
+
+// Preserve semantic layer order, registering numeric suites before explicit concerns within each layer.
+for (const layer of fixtureLayers) {
+    const fixturesBySuite = new Map();
+
+    // Retain numeric suite order while grouping every schema with its data fixtures.
     for (const descriptor of fixturesByLayer.get(layer.name)) {
-        if (!fixturesByCollection.has(descriptor.collection)) fixturesByCollection.set(descriptor.collection, []);
-        fixturesByCollection.get(descriptor.collection).push(descriptor);
+        if (!fixturesBySuite.has(descriptor.suite)) fixturesBySuite.set(descriptor.suite, []);
+        fixturesBySuite.get(descriptor.suite).push(descriptor);
     }
 
-    // Register every collection description as a suite containing its independently reported fixtures.
-    for (const descriptors of fixturesByCollection.values()) {
-        suite(`${getCollectionDescription(descriptors[0])}:`, () => {
+    // Register each suite with a source-linked heading and independently linked cases.
+    for (const descriptors of fixturesBySuite.values()) {
+        const schemaPath = path.join(path.dirname(descriptors[0].path), 'schema.json');
+        assert.ok(fs.existsSync(schemaPath), `${descriptors[0].id} requires a suite schema.json.`);
+        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+        const schemaReference = path.relative(packageRoot, schemaPath).split(path.sep).join('/');
+        const schemaDescription = typeof schema.description === 'string' ? schema.description : 'invalid schema description';
+
+        suite(`${schemaDescription} (${schemaReference}):`, () => {
             for (const descriptor of descriptors) {
                 const fixture = JSON.parse(fs.readFileSync(descriptor.path, 'utf8'));
+                const fileReference = path.relative(packageRoot, descriptor.path).split(path.sep).join('/');
                 const description = typeof fixture.description === 'string' ? fixture.description : 'invalid fixture description';
-                const fixturePath = path.relative(packageRoot, descriptor.path).split(path.sep).join('/');
-                const label = `${fixturePath} / ${description}`;
-                const callback = getFixtureCallback();
+                const label = `${fileReference} / ${description}`;
+
                 test(label, () => {
-                    assert.equal(typeof fixture.description, 'string', `${fixturePath} must have a description.`);
-                    assert.ok(Object.hasOwn(fixture, 'data'), `${fixturePath} must have data.`);
-                    assert.equal(typeof fixture.valid, 'boolean', `${fixturePath} must have a boolean valid result.`);
-                    if (fixture.valid) assert.equal(callback(fixture.data), true, label);
-                    else assert.throws(() => callback(fixture.data), undefined, label);
+                    assert.equal(typeof schema.description, 'string', `${schemaReference} must have a description.`);
+                    assert.equal(typeof fixture.description, 'string', `${fileReference} must have a description.`);
+                    assert.ok(Object.hasOwn(fixture, 'data'), `${fileReference} must have data.`);
+                    assert.equal(typeof fixture.valid, 'boolean', `${fileReference} must have a boolean valid result.`);
+                    assert.match(
+                        fixture.description,
+                        fixture.valid ? /^valid\b/ : /^invalid\b/,
+                        `${fileReference} description must start with its lowercase expected result.`,
+                    );
+                    assertFixtureResult(getFixtureCallback(), fixture);
                 });
             }
         });
@@ -96,7 +117,9 @@ for (const layer of fixtureLayers) {
     // Keep explicit concerns on exact scope because compatibility describes only the fixture callback.
     for (const concern of concernsByLayer.get(layer.name) ?? []) {
         const register = require(concern.entryPoint);
+        const concernPath = path.relative(packageRoot, concern.entryPoint).split(path.sep).join('/');
         assert.equal(typeof register, 'function', `${path.relative(testsRoot, concern.entryPoint)} must export a registration function.`);
-        register(subject, { layer: concern.layer, packageRoot, testsRoot });
+        const concernSuite = (description, callback) => suite(`${description} (${concernPath}):`, callback);
+        register(subject, { layer: concern.layer, packageRoot, suite: concernSuite, testsRoot });
     }
 }
