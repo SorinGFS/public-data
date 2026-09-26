@@ -24,11 +24,11 @@ The coordinator is shared unchanged with the other libraries. It uses explicit c
   index.js
   README.md
   _load-time/
-  compile/
-  inspect/
+  compile-url-template/
+  inspect-url-template/
   is-url-template/
-  parse-template/
-  recursive-compile/
+  parse-url-template/
+  recursive-compile-url-template/
 ```
 
 Within each eligible version layer, nonversion concern directories are loaded lexically through `<concern>/index.js`. An optional `index.json` may enable cumulative cross-major discovery through `"backwardsCompatible": true`; exact-scope discovery is the default.
