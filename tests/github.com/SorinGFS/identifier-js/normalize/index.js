@@ -1,9 +1,9 @@
 'use strict';
 // Verify RFC URI/IRI normalization, explicit URI output, and registered-name mapping.
-const { describe, test } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register parsed-result normalization concerns against the package API supplied by the root test entry point.
-module.exports = (subject) => {
+module.exports = (subject, { describe }) => {
     // Route shared cases through the IRI-reference parser before invoking lazy normalization.
     const id = Object.assign({}, subject, {
         normalize: (reference, options) => subject.parseIriReference(reference).normalize(options),

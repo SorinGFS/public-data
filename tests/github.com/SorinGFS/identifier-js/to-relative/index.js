@@ -1,10 +1,10 @@
 'use strict';
 // Verify relative-reference generation and round-trip preservation.
-const { describe, test } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { format } = require('node:util');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id) => {
+module.exports = (id, { describe }) => {
     // Register each table row as an independently reported Node.js test.
     const testEach = (cases) => (name, callback) => {
         // Preserve fixture order while formatting each row with its supplied values.

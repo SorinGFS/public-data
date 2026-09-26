@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { test } = require('node:test');
+const { describe, test } = require('node:test');
 const {
     discoverConcernEntryPoints,
     discoverNumberedJsonFixtures,
@@ -67,7 +67,9 @@ for (const layer of fixtureLayers) {
     // Keep explicit concerns on exact scope because compatibility describes only the fixture callback.
     for (const concern of concernsByLayer.get(layer.name) ?? []) {
         const register = require(concern.entryPoint);
+        const concernPath = path.relative(packageRoot, concern.entryPoint).split(path.sep).join('/');
         assert.equal(typeof register, 'function', `${path.relative(testsRoot, concern.entryPoint)} must export a registration function.`);
-        register(subject, { layer: concern.layer, packageRoot, testsRoot });
+        const describeConcern = (description, callback) => describe(`${description} (${concernPath}):`, callback);
+        register(subject, { describe: describeConcern, layer: concern.layer, packageRoot, testsRoot });
     }
 }

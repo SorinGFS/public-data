@@ -1,9 +1,9 @@
 'use strict';
 // Verify URI and IRI parsing against the canonical project implementation.
-const { describe, test } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id) => {
+module.exports = (id, { describe }) => {
     // Match Vitest's structural equality without requiring identical object prototypes.
     const assertParsedEqual = (actual, expected) => assert.deepEqual({ ...actual }, expected);
 

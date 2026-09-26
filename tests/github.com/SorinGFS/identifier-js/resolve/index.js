@@ -1,9 +1,9 @@
 'use strict';
 // Verify project-specific reference resolution behavior and edge cases.
-const { describe, test } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id) => {
+module.exports = (id, { describe }) => {
 
     // Verify reference resolution behavior beyond the RFC's published examples.
     const resolveTests = [
