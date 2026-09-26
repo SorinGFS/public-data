@@ -2,11 +2,11 @@
 // Register simple-path and complex-expression AST inspection measurements.
 module.exports = (_subject, { benchmark }) => {
     benchmark({
-        callback: 'inspect',
+        callback: 'inspectUrlTemplate',
         args: ['/users/{id}'],
     });
     benchmark({
-        callback: 'inspect',
+        callback: 'inspectUrlTemplate',
         args: ['/search{?q*,lang:2}'],
     });
 };

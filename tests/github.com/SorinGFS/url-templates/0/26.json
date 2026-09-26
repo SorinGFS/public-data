@@ -1,0 +1,5 @@
+{
+    "description": "invalid zero prefix length",
+    "data": "{var:0}",
+    "valid": false
+}

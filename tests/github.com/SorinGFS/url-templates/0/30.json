@@ -1,0 +1,5 @@
+{
+    "description": "invalid bare percent sign in a literal",
+    "data": "x%",
+    "valid": false
+}

@@ -13,7 +13,7 @@ const fixtureFiles = [
 
 // Register the RFC 6570 expansion suite against the package API supplied by the root dispatcher.
 module.exports = (subject) => {
-    const { parseTemplate } = subject;
+    const { parseUrlTemplate } = subject;
 
     // Load each fixture file independently so failures identify their source.
     for (const fixtureFile of fixtureFiles) {
@@ -26,9 +26,9 @@ module.exports = (subject) => {
                 const label = `${fixtureFile} / ${groupName} / ${template}`;
                 test(label, () => {
                     if (expected === false) {
-                        assert.throws(() => parseTemplate(template).expand(group.variables), undefined, label);
+                        assert.throws(() => parseUrlTemplate(template).expand(group.variables), undefined, label);
                     } else {
-                        const actual = parseTemplate(template).expand(group.variables);
+                        const actual = parseUrlTemplate(template).expand(group.variables);
                         const accepted = Array.isArray(expected) ? expected : [expected];
                         assert.ok(accepted.includes(actual), `${label}\nexpected: ${accepted.join(' OR ')}\nactual:   ${actual}`);
                     }

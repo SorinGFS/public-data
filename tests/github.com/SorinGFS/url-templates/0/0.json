@@ -1,5 +1,5 @@
 {
-    "description": "invalid non strings",
+    "description": "invalid non-string value",
     "data": 12,
     "valid": false
 }

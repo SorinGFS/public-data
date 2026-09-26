@@ -1,5 +1,5 @@
 {
-    "description": "invalid modifier having both prefix and explode",
+    "description": "invalid modifier containing both prefix and explode modifiers",
     "data": "{foo:3*}",
     "valid": false
 }

@@ -1,0 +1,5 @@
+{
+    "description": "valid Unicode ucschar in a literal",
+    "data": "café/{var}",
+    "valid": true
+}

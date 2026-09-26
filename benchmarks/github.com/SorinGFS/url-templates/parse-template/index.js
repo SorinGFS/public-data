@@ -2,11 +2,11 @@
 // Register validated expander-construction measurements for representative templates.
 module.exports = (_subject, { benchmark }) => {
     benchmark({
-        callback: 'parseTemplate',
+        callback: 'parseUrlTemplate',
         args: ['/users/{id}'],
     });
     benchmark({
-        callback: 'parseTemplate',
+        callback: 'parseUrlTemplate',
         args: ['{/segments*}{?query,lang}'],
     });
 };

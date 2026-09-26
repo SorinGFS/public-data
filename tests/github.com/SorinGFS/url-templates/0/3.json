@@ -1,5 +1,5 @@
 {
-    "description": "invalid char after explode modifier",
+    "description": "invalid character after the explode modifier",
     "data": "{foo*1}",
     "valid": false
 }

@@ -1,0 +1,5 @@
+{
+    "description": "invalid prefix length with a leading zero",
+    "data": "{var:01}",
+    "valid": false
+}

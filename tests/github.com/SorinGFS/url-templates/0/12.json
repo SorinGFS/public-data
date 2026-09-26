@@ -1,5 +1,5 @@
 {
-    "description": "valid only literal (no expressions)",
+    "description": "valid literal-only template without expressions",
     "data": "abc-XYZ_123~",
     "valid": true
 }

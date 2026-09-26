@@ -1,0 +1,5 @@
+{
+    "description": "valid apostrophe in a literal under verified Erratum 6937",
+    "data": "it's/{var}",
+    "valid": true
+}
