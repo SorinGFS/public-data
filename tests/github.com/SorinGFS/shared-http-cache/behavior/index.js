@@ -8,8 +8,9 @@ const fs = require('node:fs/promises');
 const http = require('node:http');
 const os = require('node:os');
 const path = require('node:path');
-const SharedHttpCache = require('../../../index.js');
 
+// Register behavioral coverage against the package API supplied by the public-test dispatcher.
+module.exports = (SharedHttpCache, { suite }) => suite('shared HTTP cache behavior', () => {
 // Run one test against an isolated local origin and remove every temporary resource afterward.
 async function withEnvironment(handler, options, operation) {
     const cacheDir = await fs.mkdtemp(path.join(os.tmpdir(), 'shared-http-cache-test-'));
@@ -286,4 +287,5 @@ test('uses the URL entry for non-star Vary responses', async () => {
             assert.deepEqual(bodies, ['en', 'en']);
         },
     );
+});
 });
