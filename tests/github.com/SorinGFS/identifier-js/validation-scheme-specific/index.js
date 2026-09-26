@@ -3,11 +3,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Match Vitest's Error-subclass and message-content checks.
     const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
-    describe('isUri with hostnames', () => {
+    suite('isUri with hostnames', () => {
         test('Valid character ! (sub-delims) in uri reg_name', () => {
             assert.equal(id.isUri('uri://exa!mple'), true);
         });
@@ -343,7 +343,7 @@ module.exports = (id, { describe }) => {
 
     });
 
-    describe('isIri with hostnames', () => {
+    suite('isIri with hostnames', () => {
         test('Valid character ! (sub-delims) in iri reg_name', () => {
             assert.equal(id.isIri('iri://exa!mple'), true);
         });
@@ -696,7 +696,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Verify the RFC 8141 restrictions applied when generic URI/IRI syntax uses the urn scheme.
-    describe('URN scheme grammar', () => {
+    suite('URN scheme grammar', () => {
         // Accept representative namestring forms through complete URI and IRI operations.
         test('accepts complete namestring forms', () => {
             const values = [

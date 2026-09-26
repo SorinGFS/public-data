@@ -3,7 +3,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Define the RFC base and expected result for each relative reference.
     const base = 'http://a/b/c/d;p?q';
     const refs = {
@@ -51,7 +51,7 @@ module.exports = (id, { describe }) => {
         "http:g"        :  "http:g",
     }
 
-    describe('resolveReference', () => {
+    suite('resolveReference', () => {
         // Register each RFC reference as an independently reported test.
         Object.keys(refs).forEach((reference) => {
             const expected = refs[reference];

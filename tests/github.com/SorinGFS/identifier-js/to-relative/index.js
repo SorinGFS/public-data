@@ -4,7 +4,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { format } = require('node:util');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Register each table row as an independently reported Node.js test.
     const testEach = (cases) => (name, callback) => {
         // Preserve fixture order while formatting each row with its supplied values.
@@ -12,7 +12,7 @@ module.exports = (id, { describe }) => {
     };
 
     // Verify relative-reference generation and round trips through reference resolution.
-    describe('toRelativeReference IRI', () => {
+    suite('toRelativeReference IRI', () => {
         testEach([
             ['https://examplé.com/var/lib', 'https://examplé.com', '/var/lib'],
             ['https://examplé.com/var/lib', 'https://examplé.com/z', 'var/lib'],
@@ -36,7 +36,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('toRelativeReference URI', () => {
+    suite('toRelativeReference URI', () => {
         testEach([
             ['https://example.com/var/lib', 'https://example.com', '/var/lib'],
             ['https://example.com/var/lib', 'https://example.com/z', 'var/lib'],
@@ -61,7 +61,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Verify empty components and path forms that require explicit inheritance control.
-    describe('toRelativeReference component presence', () => {
+    suite('toRelativeReference component presence', () => {
         // Require every generated reference to have the expected form and resolve back to its target.
         testEach([
             ['clears a query on the same absolute path', 'https://example.com/a/item', 'https://example.com/a/item?old', '/a/item'],
@@ -83,7 +83,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Verify dot-segment fallbacks by comparing results after RFC reference resolution.
-    describe('toRelativeReference dot-segment resolution equivalence', () => {
+    suite('toRelativeReference dot-segment resolution equivalence', () => {
         // Avoid constructing a relative form whose target spelling is removed during resolution.
         test('falls back for target dot segments', () => {
             const target = 'https://example.com/a/b/../c?query#fragment';
@@ -104,7 +104,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Keep URN names outside generic relative-reference processing.
-    describe('toRelativeReference URN handling', () => {
+    suite('toRelativeReference URN handling', () => {
         test('rejects URN targets and bases', () => {
             assert.throws(() => id.toRelativeReference('urn:example:a', 'https://example.com/base'), /URN reference conversion is not supported/);
             assert.throws(() => id.toRelativeReference('https://example.com/target', 'urn:example:a'), /URN reference conversion is not supported/);
@@ -130,7 +130,7 @@ module.exports = (id, { describe }) => {
     ];
     let matrixCaseCount = 0;
 
-    describe('toRelativeReference exhaustive component matrix', () => {
+    suite('toRelativeReference exhaustive component matrix', () => {
         // Exercise equivalent ASCII URI and Unicode IRI component families.
         for (const family of matrixFamilies) {
             // Compare every target path with every possible base path.

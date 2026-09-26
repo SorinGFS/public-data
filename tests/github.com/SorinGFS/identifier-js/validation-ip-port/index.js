@@ -3,11 +3,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
-module.exports = (id, { describe }) => {
+module.exports = (id, { suite }) => {
     // Match Vitest's Error-subclass and message-content checks.
     const assertError = (operation, message) => assert.throws(operation, (error) => error instanceof Error && error.message.includes(message));
 
-    describe('isUri – IPv4 host validation', () => {
+    suite('isUri – IPv4 host validation', () => {
         test('Valid full IPv4 address', () => {
             assert.equal(id.isUri('https://1.2.3.4'), true);
         });
@@ -17,7 +17,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isIri – IPv4 host validation', () => {
+    suite('isIri – IPv4 host validation', () => {
         test('Valid full IPv4 address', () => {
             assert.equal(id.isIri('https://1.2.3.4'), true);
         });
@@ -28,7 +28,7 @@ module.exports = (id, { describe }) => {
     });
 
     // Verify both ABNF-permitted cases of the IPvFuture version marker.
-    describe('URI and IRI IPvFuture host validation', () => {
+    suite('URI and IRI IPvFuture host validation', () => {
         // Retain coverage for the conventional lowercase marker.
         test('URI accepts a lowercase IPvFuture version marker', () => {
             assert.equal(id.isUri('scheme://[v1.a]'), true);
@@ -50,7 +50,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUri – IPv6 host validation', () => {
+    suite('isUri – IPv6 host validation', () => {
         test('Valid full (uncompressed) IPv6 address', () => {
             assert.equal(id.isUri('https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]'), true);
         });
@@ -140,7 +140,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isIri – IPv6 host validation', () => {
+    suite('isIri – IPv6 host validation', () => {
         test('Valid full (uncompressed) IPv6 address', () => {
             assert.equal(id.isIri('https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]'), true);
         });
@@ -230,7 +230,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isUri – port validation', () => {
+    suite('isUri – port validation', () => {
         test('Valid port', () => {
             assert.equal(id.isUri('https://example.com:80'), true);
         });
@@ -280,7 +280,7 @@ module.exports = (id, { describe }) => {
         });
     });
 
-    describe('isIri – port validation', () => {
+    suite('isIri – port validation', () => {
         test('Valid port', () => {
             assert.equal(id.isIri('https://example.com:80'), true);
         });

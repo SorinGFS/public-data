@@ -3,14 +3,14 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register parsed-result normalization concerns against the package API supplied by the root test entry point.
-module.exports = (subject, { describe }) => {
+module.exports = (subject, { suite }) => {
     // Route shared cases through the IRI-reference parser before invoking lazy normalization.
     const id = Object.assign({}, subject, {
         normalize: (reference, options) => subject.parseIriReference(reference).normalize(options),
     });
 
     // Cover generic component normalization and recognized scheme transformations.
-    describe('parsed normalize generic syntax', () => {
+    suite('parsed normalize generic syntax', () => {
         // Apply case, percent-triplet, unreserved, and path transformations component by component.
         test('normalizes a complete URI reference', () => {
             assert.equal(id.normalize('HTTP://Example.COM/%7e/a/../b?x=%2f#%41'), 'http://example.com/~/b?x=%2F#A');
@@ -131,7 +131,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Cover deterministic IP-literal handling independently from registered-name mappers.
-    describe('parsed normalize IP literals', () => {
+    suite('parsed normalize IP literals', () => {
         // Enforce RFC 5952 leading-zero, compression, tie, and lowercase requirements.
         test('canonicalizes ordinary IPv6 forms', () => {
             const cases = [
@@ -174,7 +174,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Cover the optional synchronous extension point for DNS and application name policies.
-    describe('parsed normalize registered-name mapper', () => {
+    suite('parsed normalize registered-name mapper', () => {
         // Supply the current internationalized name and use the returned ASCII representation.
         test('maps a registered name through structured options', () => {
             let received;
@@ -295,7 +295,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Verify explicit RFC 3987 IRI-to-URI output across every Unicode-capable component.
-    describe('parsed normalize URI output', () => {
+    suite('parsed normalize URI output', () => {
         // Map a domain to ACE and UTF-8 percent-encode userinfo, path, query, and fragment text.
         test('encodes every internationalized component without mutation', () => {
             const parsed = subject.parseIri('https://usér@例え.テスト/a/../café?q=資料\uE000#結果');
@@ -368,7 +368,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Verify explicit RFC 3987 URI-to-IRI output without decoding unsafe or ambiguous octets.
-    describe('parsed normalize IRI output', () => {
+    suite('parsed normalize IRI output', () => {
         // Decode strict UTF-8 across every Unicode-capable component while retaining parsed state.
         test('decodes every internationalized component without mutation', () => {
             const parsed = subject.parseIriReference('x://us%C3%A9r@r%C3%A9sum%C3%A9.example/%F0%9F%98%80?q=%E8%B3%87%E6%96%99#r%C3%A9sultat');
@@ -438,7 +438,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Verify global properties across representative URI and IRI component categories.
-    describe('parsed normalize properties', () => {
+    suite('parsed normalize properties', () => {
         // Expose lazy normalization on every parser result while removing the standalone package export.
         test('is available only through URI and IRI parse results', () => {
             const cases = [
@@ -525,7 +525,7 @@ module.exports = (subject, { describe }) => {
     });
 
     // Verify scheme-specific normalization from generic URN component fields.
-    describe('parsed normalize URN scheme', () => {
+    suite('parsed normalize URN scheme', () => {
         // Apply conservative case normalization without changing encoded assigned-name octets.
         test('normalizes scheme, NID, and percent-triplet case without decoding', () => {
             const input = 'URN:EXAMPLE:a%62%2c%7e/../B?+r%65s%2f?=q%75ery%2f#fr%61g%2f';
