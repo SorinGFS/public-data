@@ -36,6 +36,7 @@ module.exports = (fn, { suite }) => {
         ['safe integer multiple', 10, 2, true],
         ['safe integer nonmultiple', 7, 2, false],
         ['negative integer multiple', -10, 2, true],
+        ['fractional value is not a multiple of an integer', 4.5, 2, false],
         ['ordinary decimal multiple', 4.5, 1.5, true],
         ['ordinary decimal nonmultiple', 35, 1.5, false],
         ['small decimal multiple', 0.0075, 0.0001, true],
