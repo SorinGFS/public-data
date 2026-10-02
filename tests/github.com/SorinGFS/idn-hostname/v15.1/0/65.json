@@ -1,5 +1,5 @@
 {
-    "description": "invalid: Bidi Rule 1 — R-branch fail: contains R but doesn't start with R",
-    "data": "gא",
-    "valid": false
+    "description": "valid 64-code-point raw label mapping to a 63-octet ASCII label after one ignored U+180E is removed",
+    "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u180E",
+    "valid": true
 }

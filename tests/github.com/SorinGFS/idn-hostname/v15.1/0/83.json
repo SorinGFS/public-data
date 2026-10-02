@@ -1,5 +1,5 @@
 {
-    "description": "valid: Bidi Rule 6 — pass: starts L and ends with L",
-    "data": "gk",
+    "description": "valid 255-code-point raw hostname mapping to a 251-octet ASCII hostname after one ignored U+180E is removed from each of four labels",
+    "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u180E.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u180E.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u180E.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u180E",
     "valid": true
 }
