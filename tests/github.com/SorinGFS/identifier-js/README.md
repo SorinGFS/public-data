@@ -1,6 +1,6 @@
 # Public test layout
 
-This directory is the single entry point for the materialized public test suite. Run it through the package command:
+This directory is the single entry point for the materialized public test suite. From the project root, after the public workspace data has been materialized, run it through the package command:
 
 ```sh
 npm test
@@ -13,6 +13,22 @@ node ./#/public/tests
 ```
 
 Node loads `index.js`, which discovers fixtures and suites explicitly. It does not use `*.test.js` discovery.
+
+## Identifier JS coverage
+
+The public suite contains **3,192 tests across 43 suites**. The concern entry points below cover Identifier JS syntax, normalization, resolution, and reference conversion.
+
+| Concern entry point | Coverage |
+| --- | --- |
+| [normalize](normalize/index.js) | Generic and scheme normalization, URI/IRI transformation, host mapping, non-mutation, idempotence, and [file/no-authority path-form stability](../../../normalization.md#path-form-preservation), including percent normalization before dot reduction. |
+| [parse](parse/index.js) | URI/IRI component captures, Unicode, absent and empty components, and generic URN component boundaries. |
+| [resolve](resolve/index.js) | [Resolution boundaries](../../../readme.md#reference-resolution): upfront file query/userinfo/port/authority-path guards and post-calculation file path-prefix rejection, both string and parts returns, runtime object operands, empty versus null/undefined presence, and canonical raw authority. Valid hosted/bracketed file hosts, fragments, internal repeated slashes, generic and explicit non-file schemes, operation Errors, and base-first URN ordering are retained. |
+| [resolve-rfc](resolve-rfc/index.js) | RFC 3986 normal and abnormal resolution examples. |
+| [to-absolute](to-absolute/index.js) | Fragment removal without other component changes and URN rejection. |
+| [to-relative](to-relative/index.js) | Relative round trips, dot-segment stability and differing scheme/authority absolute-target fallbacks (including file targets), parser SyntaxErrors for malformed file targets, URN rejection, and the guarded 2,646-case URI/IRI inverse matrix across target/base paths, query-presence states, and target-fragment states. |
+| [validation](validation/index.js) | Generic URI/IRI and UUID validation. |
+| [validation-ip-port](validation-ip-port/index.js) | IPv4, IPv6, IPvFuture, and generic port syntax. |
+| [validation-scheme-specific](validation-scheme-specific/index.js) | HTTP/WebSocket DNS hosts, URNs, and the [core file grammar](../../../readme.md#file-grammar): required absolute paths, absent/empty/named authorities, generic hosts, URI versus IRI text, fragments versus absolute forms, and valid/invalid core-grammar cases. |
 
 ## Portability and CI use
 

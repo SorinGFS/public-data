@@ -56,8 +56,25 @@ module.exports = (subject, { suite }) => {
             assert.equal(id.normalize('g?x/../y#s/../t'), 'g?x/../y#s/../t');
         });
 
-        // Avoid turning a no-authority path into a network-path or authority during recomposition.
-        test('preserves no-authority paths when reduction would produce two leading slashes', () => {
+        // Avoid producing paths that reparse as authorities or violate the file absolute-path grammar.
+        test('preserves no-authority and file paths when reduction would produce two leading slashes', () => {
+            const cases = [
+                ['file:///a/..//b', 'file:///a/..//b'],
+                ['file://example.com/a/..//b', 'file://example.com/a/..//b'],
+                ['file:/a/..//b', 'file:/a/..//b'],
+                ['FILE://EXAMPLE.COM/a/..//b', 'file://example.com/a/..//b'],
+                ['file:///a/%2e%2e//b', 'file:///a/..//b'],
+                ['x:///a/..//b', 'x:////b'],
+            ];
+            // Keep each output valid and stable while preserving the parsed input components.
+            for (const [input, expected] of cases) {
+                const parsed = subject.parseUri(input);
+                const components = Object.assign({}, parsed);
+                assert.equal(parsed.normalize(), expected);
+                assert.equal(id.isUri(expected), true);
+                assert.equal(id.normalize(expected), expected);
+                assert.deepEqual(Object.assign({}, parsed), components);
+            }
             assert.equal(id.normalize('x:/..//a'), 'x:/..//a');
             assert.equal(id.normalize('/..//a'), '/..//a');
         });
@@ -505,7 +522,7 @@ module.exports = (subject, { suite }) => {
                 '../a/%2e/b/../c',
                 'https://ÉXAMPLE.测试/Cafe\u0301',
                 'x://[2001:0DB8:0:0:0:0:2:1]/',
-                'file:///a/../b?',
+                'file:///a/../b',
                 'x:/..//a',
             ];
             // Compare one normalization pass with a second pass for every processing branch.

@@ -81,10 +81,129 @@ module.exports = (id, { suite }) => {
             assert.equal(id.resolveReference('uri:///target', 'uri:/base'), 'uri:///target');
         });
 
+        // Reject file resolution combinations that cannot produce supported file targets.
+        const fileResolutionError = /^File reference resolution is not supported/;
+        const fileResolutionPathError = 'File reference resolution is not supported for this base/reference path combination.';
+        // Require operation-level errors without accepting parser SyntaxErrors.
+        const assertFileResolutionError = (callback, message = fileResolutionError) => assert.throws(callback, { name: 'Error', message });
+        const unsupportedFileReferences = [
+            ['an empty query-only reference', '?', 'file:///base/item'],
+            ['a query-only reference', '?query', 'file:///base/item'],
+            ['authority userinfo', '//user@host/path', 'file:///base/item'],
+            ['empty authority userinfo', '//@host/path', 'file:///base/item'],
+            ['a numeric authority port', '//host:80/path', 'file:///base/item'],
+            ['an empty authority port', '//host:/path', 'file:///base/item'],
+            ['an IPv6 authority port', '//[::1]:80/path', 'file:///base/item'],
+            ['an empty IPv6 authority port', '//[::1]:/path', 'file:///base/item'],
+            ['an authority without an absolute path', '//host', 'file:///base/item'],
+        ];
+        // Report each unsupported operand combination independently.
+        unsupportedFileReferences.forEach(([description, reference, base]) => {
+            test(`Rejects ${description} with a file base`, () => {
+                // Keep component-returning resolution subject to the same upfront policy.
+                for (const returnParts of [false, true]) {
+                    assertFileResolutionError(() => id.resolveReference(reference, base, true, returnParts));
+                }
+            });
+        });
+
+        // Apply the same canonical-authority restrictions to component-object references.
+        test('Rejects unsupported file component-object authority combinations', () => {
+            const base = { scheme: 'file', authority: '', path: '/base/item' };
+            const references = [
+                { authority: 'user@host', path: '/path' },
+                { authority: '@host', path: '/path' },
+                { authority: 'host:80', path: '/path' },
+                { authority: 'host:', path: '/path' },
+                { authority: '[::1]:80', path: '/path' },
+                { authority: '[::1]:', path: '/path' },
+                { authority: 'host', path: '' },
+            ];
+            // Exercise raw authority text without relying on optional parser captures.
+            for (const reference of references) assertFileResolutionError(() => id.resolveReference(reference, base));
+            assertFileResolutionError(() => id.resolveReference('child', { scheme: 'file', authority: 'host:', path: '/base/' }));
+        });
+
+        // Distinguish null-as-absent component input from present empty components.
+        test('Preserves supported file component-object absence and canonical authority input', () => {
+            const base = { scheme: 'file', authority: '', path: '/base/item' };
+            assert.equal(id.resolveReference({ path: '', query: null, fragment: null }, base), 'file:///base/item');
+            assert.equal(id.resolveReference({ authority: null, path: '/target' }, base), 'file:///target');
+            assert.equal(id.resolveReference({ authority: '', path: '/target' }, base), 'file:///target');
+            assert.equal(id.resolveReference({ authority: 'host', path: '/target' }, base), 'file://host/target');
+            assertFileResolutionError(() => id.resolveReference({ path: '', query: '' }, base));
+        });
+
+        // Cover inherited queries on base objects that bypass the string parser.
+        test('Rejects query components on a file base object', () => {
+            // Treat empty and non-empty base queries as present in either return mode.
+            for (const query of ['', 'query']) {
+                const base = { scheme: 'file', authority: '', path: '/base/item', query };
+                assertFileResolutionError(() => id.resolveReference('', base));
+                assertFileResolutionError(() => id.resolveReference('', base, true, true));
+            }
+        });
+
+        // Keep the component return mode and caller-owned operands intact for supported resolution.
+        test('Returns file components without mutating operands', () => {
+            const reference = { authority: 'server', path: '/a/../target', query: null, fragment: 'fragment' };
+            const base = { scheme: 'file', authority: '', path: '/base/' };
+            assert.deepEqual(id.resolveReference(reference, base, true, true), {
+                scheme: 'file', authority: 'server', path: '/target', query: null, fragment: 'fragment',
+            });
+            assert.deepEqual(reference, { authority: 'server', path: '/a/../target', query: null, fragment: 'fragment' });
+            assert.deepEqual(base, { scheme: 'file', authority: '', path: '/base/' });
+        });
+
+        // Retain supported file and generic reference combinations outside the new guard.
+        test('Retains supported file resolution combinations', () => {
+            const cases = [
+                ['child', 'file:///base/', 'file:///base/child'],
+                ['child', 'file:/base/', 'file:/base/child'],
+                ['a//b', 'file:///base/', 'file:///base/a//b'],
+                ['', 'file:///base/item', 'file:///base/item'],
+                ['#fragment', 'file:///base/item', 'file:///base/item#fragment'],
+                ['#', 'file:///base/item', 'file:///base/item#'],
+                ['#?fragment', 'file:///base/item', 'file:///base/item#?fragment'],
+                ['//[v1.a:b]/target', 'file:///base/item', 'file://[v1.a:b]/target'],
+                ['child', 'file://server/base/', 'file://server/base/child'],
+                ['child', 'file://192.0.2.1/base/', 'file://192.0.2.1/base/child'],
+                ['child', 'file://[::1]/base/', 'file://[::1]/base/child'],
+                ['child', 'file://[v1.a]/base/', 'file://[v1.a]/base/child'],
+                ['child', 'file://host%40name/base/', 'file://host%40name/base/child'],
+                ['child', 'file://host%3Aname/base/', 'file://host%3Aname/base/child'],
+                ['http://example.com/target', 'file:///base/item', 'http://example.com/target'],
+                ['https://example.com/target', 'file:///base/item', 'https://example.com/target'],
+                ['https://example.com:8443/target?query#fragment', 'file:///base/item', 'https://example.com:8443/target?query#fragment'],
+                ['file:///target', 'https://example.com:8443/base?query', 'file:///target'],
+            ];
+            // Preserve file resolution without imposing its restrictions on explicit non-file schemes.
+            for (const [reference, base, expected] of cases) assert.equal(id.resolveReference(reference, base), expected);
+            assert.equal(id.resolveReference('FiLe:/target', 'file:///base/item', false), 'file:///target');
+            assert.equal(id.resolveReference('..//b', 'x:///base/'), 'x:////b');
+        });
+
+        // Check the final file target after RFC path merging and dot-segment removal.
+        test('Rejects file paths that become unsupported during resolution', () => {
+            const references = ['..//b', 'file:/a/..//b'];
+            // Apply the post-calculation boundary to both target representations.
+            for (const returnParts of [false, true]) {
+                // Cover merged relative paths and complete file-reference paths.
+                for (const reference of references) {
+                    assertFileResolutionError(() => id.resolveReference(reference, 'file:///base/item', true, returnParts), fileResolutionPathError);
+                }
+            }
+        });
+
         // Keep URN names outside generic hierarchical reference processing.
         test('Rejects URN bases and references', () => {
             assert.throws(() => id.resolveReference('', 'urn:example:a'), /URN reference resolution is not supported/);
             assert.throws(() => id.resolveReference('urn:example:a', 'https://example.com/base'), /URN reference resolution is not supported/);
+        });
+
+        // Check that the base URN rejection precedes parsing an invalid reference.
+        test('Rejects a URN base before parsing its reference', () => {
+            assert.throws(() => id.resolveReference('not a valid IRI', 'urn:example:a'), /URN reference resolution is not supported/);
         });
     });
 

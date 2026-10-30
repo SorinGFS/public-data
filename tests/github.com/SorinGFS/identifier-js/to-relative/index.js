@@ -103,6 +103,38 @@ module.exports = (id, { suite }) => {
         });
     });
 
+    // Verify supported file conversion and preserve absolute fallbacks outside a shared authority.
+    suite('toRelativeReference file handling', () => {
+        // Keep ordinary file-to-file conversion available under the shared operation guard.
+        test('round-trips a file target on the same host', () => {
+            const target = 'file://server/base/target';
+            const base = 'file://server/base/item';
+            const relative = id.toRelativeReference(target, base);
+            assert.equal(relative, 'target');
+            assert.equal(id.resolveReference(relative, base), target);
+        });
+
+        // File fragments remain generic even though file query components are unsupported.
+        test('retains a file fragment target as a relative fragment', () => {
+            const target = 'file:///base/item#fragment';
+            const base = 'file:///base/item';
+            const relative = id.toRelativeReference(target, base);
+            assert.equal(relative, '#fragment');
+            assert.equal(id.resolveReference(relative, base), target);
+        });
+
+        // Retain absolute-target fallback instead of rejecting mixed schemes or authorities.
+        test('falls back to absolute targets for different file authorities and schemes', () => {
+            assert.equal(id.toRelativeReference('file://other/base/item', 'file://server/base/item'), 'file://other/base/item');
+            assert.equal(id.toRelativeReference('https://example.com/target', 'file:///base/item'), 'https://example.com/target');
+        });
+
+        // Keep invalid operand syntax separate from unsupported-operation errors.
+        test('keeps invalid complete file targets as parser SyntaxErrors', () => {
+            assert.throws(() => id.toRelativeReference('file://user@host/path', 'file:///base/item'), SyntaxError);
+        });
+    });
+
     // Keep URN names outside generic relative-reference processing.
     suite('toRelativeReference URN handling', () => {
         test('rejects URN targets and bases', () => {
