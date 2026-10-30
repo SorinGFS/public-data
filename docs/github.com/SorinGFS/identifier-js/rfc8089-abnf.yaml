@@ -1,0 +1,30 @@
+# File-specific ABNF productions from RFC 8089, Section 2.
+# https://www.rfc-editor.org/rfc/rfc8089.html#section-2
+# host and path-absolute are defined in rfc3986-rfc3987-abnf.yaml.
+
+file-URI:
+  syntax: |
+    file-scheme ":" file-hier-part
+  description: File URI.
+file-scheme:
+  syntax: |
+    "file"
+  description: File URI scheme.
+file-hier-part:
+  syntax: |
+    ( "//" auth-path )
+    / local-path
+  description: File authority-and-path form or local absolute path.
+auth-path:
+  syntax: |
+    [ file-auth ] path-absolute
+  description: Optional file authority followed by an absolute path.
+local-path:
+  syntax: |
+    path-absolute
+  description: Local absolute path without an authority.
+file-auth:
+  syntax: |
+    "localhost"
+    / host
+  description: File authority naming the host, with localhost denoting the local machine.

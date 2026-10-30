@@ -1,5 +1,5 @@
 'use strict';
-// Verify scheme-specific hostname validation policies.
+// Verify scheme-specific URI/IRI grammar, hostname policies, and parsed components.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // Register this concern against the package API supplied by the root test entry point.
@@ -103,7 +103,7 @@ module.exports = (id, { suite }) => {
         // Accept the RFC 3986 DNS form with one terminal root dot for every DNS-host URI scheme.
         test('Valid - terminal DNS root dot', () => {
             // Exercise each scheme that specializes registered names as DNS hosts.
-            for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
+            for (const scheme of ['http', 'https', 'ws', 'wss']) {
                 const absoluteInput = `${scheme}://example.com.:8443/path?query`;
                 const input = absoluteInput + '#fragment';
                 const parsed = id.parseUri(input);
@@ -144,8 +144,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa%20mple'), 'Invalid URI: wss://exa%20mple');
         });
 
-        test('Invalid - % character (pct_encoded) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa%20mple'), 'Invalid URI: file://exa%20mple');
+        // RFC 8089 imports generic URI host syntax, including percent-encoded octets.
+        test('Valid character %20 (pct-encoded) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa%20mple/path'), true);
         });
 
         test('Invalid - ~ character (unreserved) in http(s) reg_name', () => {
@@ -156,8 +157,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa~mple'), 'Invalid URI: wss://exa~mple');
         });
 
-        test('Invalid - ~ character (unreserved) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa~mple'), 'Invalid URI: file://exa~mple');
+        // RFC 8089 imports generic URI host syntax, including the unreserved "~" character.
+        test('Valid character ~ (unreserved) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa~mple/path'), true);
         });
 
         test('Invalid - _ character (unreserved) in http(s) reg_name', () => {
@@ -168,8 +170,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa_mple'), 'Invalid URI: wss://exa_mple');
         });
 
-        test('Invalid - _ character (unreserved) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa_mple'), 'Invalid URI: file://exa_mple');
+        // RFC 8089 imports generic URI host syntax, including the unreserved "_" character.
+        test('Valid character _ (unreserved) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa_mple/path'), true);
         });
 
         test('Invalid - ! character (sub-delims) in http(s) reg_name', () => {
@@ -180,8 +183,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa!mple'), 'Invalid URI: wss://exa!mple');
         });
 
-        test('Invalid - ! character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa!mple'), 'Invalid URI: file://exa!mple');
+        // RFC 8089 imports generic URI host syntax, including the "!" sub-delimiter.
+        test('Valid character ! (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa!mple/path'), true);
         });
 
         test('Invalid - & character (sub-delims) in http(s) reg_name', () => {
@@ -192,8 +196,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa&mple'), 'Invalid URI: wss://exa&mple');
         });
 
-        test('Invalid - & character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa&mple'), 'Invalid URI: file://exa&mple');
+        // RFC 8089 imports generic URI host syntax, including the "&" sub-delimiter.
+        test('Valid character & (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa&mple/path'), true);
         });
 
         test('Invalid - $ character (sub-delims) in http(s) reg_name', () => {
@@ -204,8 +209,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa$mple'), 'Invalid URI: wss://exa$mple');
         });
 
-        test('Invalid - $ character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa$mple'), 'Invalid URI: file://exa$mple');
+        // RFC 8089 imports generic URI host syntax, including the "$" sub-delimiter.
+        test('Valid character $ (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa$mple/path'), true);
         });
 
         test("Invalid - ' character (sub-delims) in http(s) reg_name", () => {
@@ -216,8 +222,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri("wss://exa'mple"), "Invalid URI: wss://exa'mple");
         });
 
-        test("Invalid - ' character (sub-delims) in file reg_name", () => {
-            assertError(() => id.isUri("file://exa'mple"), "Invalid URI: file://exa'mple");
+        // RFC 8089 imports generic URI host syntax, including the "'" sub-delimiter.
+        test("Valid character ' (sub-delims) in file reg_name", () => {
+            assert.equal(id.isUri("file://exa'mple/path"), true);
         });
 
         test('Invalid - ( character (sub-delims) in http(s) reg_name', () => {
@@ -228,8 +235,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa(mple'), 'Invalid URI: wss://exa(mple');
         });
 
-        test('Invalid - ( character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa(mple'), 'Invalid URI: file://exa(mple');
+        // RFC 8089 imports generic URI host syntax, including the "(" sub-delimiter.
+        test('Valid character ( (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa(mple/path'), true);
         });
 
         test('Invalid - ) character (sub-delims) in http(s) reg_name', () => {
@@ -240,8 +248,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa)mple'), 'Invalid URI: wss://exa)mple');
         });
 
-        test('Invalid - ) character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa)mple'), 'Invalid URI: file://exa)mple');
+        // RFC 8089 imports generic URI host syntax, including the ")" sub-delimiter.
+        test('Valid character ) (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa)mple/path'), true);
         });
 
         test('Invalid - * character (sub-delims) in http(s) reg_name', () => {
@@ -252,8 +261,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa*mple'), 'Invalid URI: wss://exa*mple');
         });
 
-        test('Invalid - * character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa*mple'), 'Invalid URI: file://exa*mple');
+        // RFC 8089 imports generic URI host syntax, including the "*" sub-delimiter.
+        test('Valid character * (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa*mple/path'), true);
         });
 
         test('Invalid - + character (sub-delims) in http(s) reg_name', () => {
@@ -264,8 +274,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa+mple'), 'Invalid URI: wss://exa+mple');
         });
 
-        test('Invalid - + character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa+mple'), 'Invalid URI: file://exa+mple');
+        // RFC 8089 imports generic URI host syntax, including the "+" sub-delimiter.
+        test('Valid character + (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa+mple/path'), true);
         });
 
         test('Invalid - , character (sub-delims) in http(s) reg_name', () => {
@@ -276,8 +287,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa,mple'), 'Invalid URI: wss://exa,mple');
         });
 
-        test('Invalid - , character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa,mple'), 'Invalid URI: file://exa,mple');
+        // RFC 8089 imports generic URI host syntax, including the "," sub-delimiter.
+        test('Valid character , (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa,mple/path'), true);
         });
 
         test('Invalid - ; character (sub-delims) in http(s) reg_name', () => {
@@ -288,8 +300,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa;mple'), 'Invalid URI: wss://exa;mple');
         });
 
-        test('Invalid - ; character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa;mple'), 'Invalid URI: file://exa;mple');
+        // RFC 8089 imports generic URI host syntax, including the ";" sub-delimiter.
+        test('Valid character ; (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa;mple/path'), true);
         });
 
         test('Invalid - = character (sub-delims) in http(s) reg_name', () => {
@@ -300,8 +313,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isUri('wss://exa=mple'), 'Invalid URI: wss://exa=mple');
         });
 
-        test('Invalid - = character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isUri('file://exa=mple'), 'Invalid URI: file://exa=mple');
+        // RFC 8089 imports generic URI host syntax, including the "=" sub-delimiter.
+        test('Valid character = (sub-delims) in file reg_name', () => {
+            assert.equal(id.isUri('file://exa=mple/path'), true);
         });
 
         test('Valid case insensitive http scheme', () => {
@@ -337,8 +351,9 @@ module.exports = (id, { suite }) => {
             }
         });
 
+        // Vary the URI scheme's case while retaining the required absolute file path.
         test('Valid case insensitive file scheme', () => {
-            assert.equal(id.isUri('fILE://example'), true);
+            assert.equal(id.isUri('fILE://example/path'), true);
         });
 
     });
@@ -452,7 +467,7 @@ module.exports = (id, { suite }) => {
         test('Valid - terminal DNS root separator', () => {
             // Preserve each parsed separator while exercising every DNS-host IRI scheme.
             for (const separator of ['.', '\uFF0E', '\u3002', '\uFF61']) {
-                for (const scheme of ['http', 'https', 'ws', 'wss', 'file']) {
+                for (const scheme of ['http', 'https', 'ws', 'wss']) {
                     const absoluteInput = `${scheme}://例子${separator}:8443/path?query`;
                     const input = absoluteInput + '#fragment';
                     const parsed = id.parseIri(input);
@@ -496,8 +511,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa%20mple'), 'Invalid IRI: wss://exa%20mple');
         });
 
-        test('Invalid - % character (pct_encoded) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa%20mple'), 'Invalid IRI: file://exa%20mple');
+        // RFC 8089 imports generic IRI host syntax, including percent-encoded octets.
+        test('Valid character %20 (pct-encoded) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa%20mple/path'), true);
         });
 
         test('Invalid - ~ character (unreserved) in http(s) reg_name', () => {
@@ -508,8 +524,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa~mple'), 'Invalid IRI: wss://exa~mple');
         });
 
-        test('Invalid - ~ character (unreserved) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa~mple'), 'Invalid IRI: file://exa~mple');
+        // RFC 8089 imports generic IRI host syntax, including the unreserved "~" character.
+        test('Valid character ~ (unreserved) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa~mple/path'), true);
         });
 
         test('Invalid - _ character (unreserved) in http(s) reg_name', () => {
@@ -520,8 +537,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa_mple'), 'Invalid IRI: wss://exa_mple');
         });
 
-        test('Invalid - _ character (unreserved) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa_mple'), 'Invalid IRI: file://exa_mple');
+        // RFC 8089 imports generic IRI host syntax, including the unreserved "_" character.
+        test('Valid character _ (unreserved) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa_mple/path'), true);
         });
 
         test('Invalid - ! character (sub-delims) in http(s) reg_name', () => {
@@ -532,8 +550,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa!mple'), 'Invalid IRI: wss://exa!mple');
         });
 
-        test('Invalid - ! character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa!mple'), 'Invalid IRI: file://exa!mple');
+        // RFC 8089 imports generic IRI host syntax, including the "!" sub-delimiter.
+        test('Valid character ! (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa!mple/path'), true);
         });
 
         test('Invalid - & character (sub-delims) in http(s) reg_name', () => {
@@ -544,8 +563,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa&mple'), 'Invalid IRI: wss://exa&mple');
         });
 
-        test('Invalid - & character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa&mple'), 'Invalid IRI: file://exa&mple');
+        // RFC 8089 imports generic IRI host syntax, including the "&" sub-delimiter.
+        test('Valid character & (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa&mple/path'), true);
         });
 
         test('Invalid - $ character (sub-delims) in http(s) reg_name', () => {
@@ -556,8 +576,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa$mple'), 'Invalid IRI: wss://exa$mple');
         });
 
-        test('Invalid - $ character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa$mple'), 'Invalid IRI: file://exa$mple');
+        // RFC 8089 imports generic IRI host syntax, including the "$" sub-delimiter.
+        test('Valid character $ (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa$mple/path'), true);
         });
 
         test("Invalid - ' character (sub-delims) in http(s) reg_name", () => {
@@ -568,8 +589,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri("wss://exa'mple"), "Invalid IRI: wss://exa'mple");
         });
 
-        test("Invalid - ' character (sub-delims) in file reg_name", () => {
-            assertError(() => id.isIri("file://exa'mple"), "Invalid IRI: file://exa'mple");
+        // RFC 8089 imports generic IRI host syntax, including the "'" sub-delimiter.
+        test("Valid character ' (sub-delims) in file reg_name", () => {
+            assert.equal(id.isIri("file://exa'mple/path"), true);
         });
 
         test('Invalid - ( character (sub-delims) in http(s) reg_name', () => {
@@ -580,8 +602,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa(mple'), 'Invalid IRI: wss://exa(mple');
         });
 
-        test('Invalid - ( character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa(mple'), 'Invalid IRI: file://exa(mple');
+        // RFC 8089 imports generic IRI host syntax, including the "(" sub-delimiter.
+        test('Valid character ( (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa(mple/path'), true);
         });
 
         test('Invalid - ) character (sub-delims) in http(s) reg_name', () => {
@@ -592,8 +615,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa)mple'), 'Invalid IRI: wss://exa)mple');
         });
 
-        test('Invalid - ) character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa)mple'), 'Invalid IRI: file://exa)mple');
+        // RFC 8089 imports generic IRI host syntax, including the ")" sub-delimiter.
+        test('Valid character ) (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa)mple/path'), true);
         });
 
         test('Invalid - * character (sub-delims) in http(s) reg_name', () => {
@@ -604,8 +628,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa*mple'), 'Invalid IRI: wss://exa*mple');
         });
 
-        test('Invalid - * character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa*mple'), 'Invalid IRI: file://exa*mple');
+        // RFC 8089 imports generic IRI host syntax, including the "*" sub-delimiter.
+        test('Valid character * (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa*mple/path'), true);
         });
 
         test('Invalid - + character (sub-delims) in http(s) reg_name', () => {
@@ -616,8 +641,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa+mple'), 'Invalid IRI: wss://exa+mple');
         });
 
-        test('Invalid - + character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa+mple'), 'Invalid IRI: file://exa+mple');
+        // RFC 8089 imports generic IRI host syntax, including the "+" sub-delimiter.
+        test('Valid character + (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa+mple/path'), true);
         });
 
         test('Invalid - , character (sub-delims) in http(s) reg_name', () => {
@@ -628,8 +654,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa,mple'), 'Invalid IRI: wss://exa,mple');
         });
 
-        test('Invalid - , character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa,mple'), 'Invalid IRI: file://exa,mple');
+        // RFC 8089 imports generic IRI host syntax, including the "," sub-delimiter.
+        test('Valid character , (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa,mple/path'), true);
         });
 
         test('Invalid - ; character (sub-delims) in http(s) reg_name', () => {
@@ -640,8 +667,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa;mple'), 'Invalid IRI: wss://exa;mple');
         });
 
-        test('Invalid - ; character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa;mple'), 'Invalid IRI: file://exa;mple');
+        // RFC 8089 imports generic IRI host syntax, including the ";" sub-delimiter.
+        test('Valid character ; (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa;mple/path'), true);
         });
 
         test('Invalid - = character (sub-delims) in http(s) reg_name', () => {
@@ -652,8 +680,9 @@ module.exports = (id, { suite }) => {
             assertError(() => id.isIri('wss://exa=mple'), 'Invalid IRI: wss://exa=mple');
         });
 
-        test('Invalid - = character (sub-delims) in file reg_name', () => {
-            assertError(() => id.isIri('file://exa=mple'), 'Invalid IRI: file://exa=mple');
+        // RFC 8089 imports generic IRI host syntax, including the "=" sub-delimiter.
+        test('Valid character = (sub-delims) in file reg_name', () => {
+            assert.equal(id.isIri('file://exa=mple/path'), true);
         });
 
         test('Valid case insensitive http scheme', () => {
@@ -689,10 +718,190 @@ module.exports = (id, { suite }) => {
             }
         });
 
+        // Vary the IRI scheme's case while retaining the required absolute file path.
         test('Valid case insensitive file scheme', () => {
-            assert.equal(id.isIri('fILE://example'), true);
+            assert.equal(id.isIri('fILE://example/path'), true);
         });
 
+    });
+
+    // Verify RFC 8089's core file syntax without enabling its nonstandard Appendix E variations.
+    suite('FILE scheme grammar', () => {
+        // Require an absolute path for local, hosted, and drive-letter-as-path forms.
+        test('accepts complete local and hosted file forms', () => {
+            const values = [
+                'file:/',
+                'file:///',
+                'file:/path/to/file',
+                'file:///path/to/file',
+                'fILE:///path/to/file',
+                'file://localhost/path',
+                'file://LOCALHOST/path',
+                'file://server.example/',
+                'file://server.example/share/path',
+                'file:/C:/Path/File.json',
+                'file:///C:/Path/File.json',
+                'file:///a//b/',
+                'file:///a/./b/../c',
+                'file://127.0.0.1/path',
+                'file://[::1]/path',
+                'file://[v1.example]/path',
+            ];
+            // Exercise every URI/IRI validator against the same ASCII file identifiers.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri']) {
+                for (const value of values) assert.equal(id[callback](value), true, callback + ': ' + value);
+            }
+        });
+
+        // Keep escaped filename delimiters as path text rather than query or fragment syntax.
+        test('accepts percent-encoded file path characters', () => {
+            const values = ['file:///a%20b', 'file:///a%23b', 'file:///a%3Fb', 'file:///a%25b', 'file:///a%2Fb', 'file:///r%C3%A9sum%C3%A9.json'];
+            // Preserve valid percent triplets in both ASCII and internationalized operations.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri']) {
+                for (const value of values) assert.equal(id[callback](value), true, callback + ': ' + value);
+            }
+        });
+
+        // File hosts import reg-name rather than imposing DNS-label restrictions on encoded text.
+        test('accepts percent-encoded host text without decoding components', () => {
+            const value = 'file://%E4%BE%8B%E5%AD%90/r%C3%A9sum%C3%A9.json';
+            // Accept the URI spelling through all validators before checking raw parser components.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri']) {
+                assert.equal(id[callback](value), true, callback + ': ' + value);
+            }
+            // Parsing preserves authored escapes; decoding is not part of component extraction.
+            for (const callback of ['parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                const parsed = id[callback](value);
+                assert.equal(parsed.authority, '%E4%BE%8B%E5%AD%90');
+                assert.equal(parsed.host, '%E4%BE%8B%E5%AD%90');
+                assert.equal(parsed.path, '/r%C3%A9sum%C3%A9.json');
+            }
+        });
+
+        // Preserve the distinction between an absent authority and an explicitly empty one.
+        test('preserves absent and empty file authorities', () => {
+            for (const callback of ['parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                const absent = id[callback]('file:/C:/Mixed/Case');
+                const empty = id[callback]('file:///C:/Mixed/Case');
+                assert.equal(absent.authority, undefined);
+                assert.equal(absent.host, undefined);
+                assert.equal(empty.authority, '');
+                assert.equal(empty.host, '');
+                assert.equal(absent.path, '/C:/Mixed/Case');
+                assert.equal(empty.path, '/C:/Mixed/Case');
+            }
+        });
+
+        // Host capture must remain present for localhost as well as remote and IP authorities.
+        test('preserves hosted file components', () => {
+            const values = [
+                ['file://localhost/Path', 'localhost', '/Path'],
+                ['file://LOCALHOST/Path', 'LOCALHOST', '/Path'],
+                ['file://server.example/Share/Path', 'server.example', '/Share/Path'],
+                ['file://[::1]/Path', '[::1]', '/Path'],
+            ];
+            // Keep path case and expose no userinfo, port, or query in valid core file forms.
+            for (const callback of ['parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const [value, host, path] of values) {
+                    const parsed = id[callback](value);
+                    assert.equal(parsed.authority, host);
+                    assert.equal(parsed.host, host);
+                    assert.equal(parsed.path, path);
+                    assert.equal(parsed.userinfo, undefined);
+                    assert.equal(parsed.port, undefined);
+                    assert.equal(parsed.query, undefined);
+                }
+            }
+        });
+
+        // File root-marker examples need a path but do not inherit network ports or queries.
+        test('accepts a terminal root dot in file URI hosts', () => {
+            const value = 'file://example.com./path';
+            // Verify the URI and its component spelling through each URI-facing operation.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri']) assert.equal(id[callback](value), true);
+            for (const callback of ['parseUri', 'parseUriReference', 'parseAbsoluteUri']) assert.equal(id[callback](value).host, 'example.com.');
+        });
+
+        // Unicode separators remain authored IRI host characters without requiring DNS rewriting.
+        test('accepts terminal root separators in file IRI hosts', () => {
+            for (const separator of ['.', '\uFF0E', '\u3002', '\uFF61']) {
+                const value = 'file://例子' + separator + '/路径';
+                // Apply IRI validation and parsing without adding network-only authority fields.
+                for (const callback of ['isIri', 'isIriReference', 'isAbsoluteIri']) assert.equal(id[callback](value), true);
+                for (const callback of ['parseIri', 'parseIriReference', 'parseAbsoluteIri']) assert.equal(id[callback](value).host, '例子' + separator);
+            }
+        });
+
+        // Internationalized file names belong to IRI syntax, not unescaped URI syntax.
+        test('accepts Unicode file IRIs without widening URI syntax', () => {
+            const values = ['file:///résumé.json', 'file://例子/路径', 'file:///emoji-😀'];
+            // Allow the IRI repertoire across complete, reference, and absolute operations.
+            for (const callback of ['isIri', 'isIriReference', 'isAbsoluteIri']) {
+                for (const value of values) assert.equal(id[callback](value), true, callback + ': ' + value);
+            }
+            // URI callers must supply percent-encoded UTF-8 rather than literal Unicode.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // Fragments belong to generic URI/IRI syntax and remain outside absolute-identifier forms.
+        test('keeps file fragments outside absolute URI and IRI grammar', () => {
+            const values = ['file:///path#', 'file:/path#/item', 'file://host.example/path#?/fragment'];
+            // Complete and reference operations accept fragments, including their question marks.
+            for (const callback of ['isUri', 'isUriReference', 'isIri', 'isIriReference']) {
+                for (const value of values) assert.equal(id[callback](value), true, callback + ': ' + value);
+            }
+            // Fragment-free absolute operations reject those same identifiers.
+            for (const callback of ['isAbsoluteUri', 'parseAbsoluteUri', 'isAbsoluteIri', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // Core file syntax requires a slash-led path even when an authority is present.
+        test('rejects empty and rootless file paths', () => {
+            const values = ['file:', 'file://', 'file://host.example', 'file:relative/path'];
+            // Neither validators nor parsers may fall back to permissive generic scheme syntax.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri', 'parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // RFC 8089's core file-auth is a host, not the generic userinfo/host/port authority.
+        test('rejects userinfo and ports in file authorities', () => {
+            const values = ['file://user@host.example/path', 'file://user:password@host.example/path', 'file://host.example:/path', 'file://host.example:0/path', 'file://host.example:80/path', 'file://[::1]:80/path'];
+            // Enforce the same authority restriction in validation and component parsing.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri', 'parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // A literal question mark is not part of the core file path and must be encoded there.
+        test('rejects file query syntax outside fragments', () => {
+            const values = ['file:///path?', 'file:///path?query', 'file://host.example/path?query#fragment'];
+            // Reject queries rather than silently treating them as filename characters.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri', 'parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // Appendix E spellings are not part of the extracted core RFC 8089 grammar.
+        test('rejects nonstandard drive and UNC URI forms', () => {
+            const values = ['file:C:/path', 'file:///C|/path', 'file:/C|/path', 'file:////server/share/path', 'file://///server/share/path'];
+            // Do not enable legacy extensions through generic rootless or path-abempty alternatives.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri', 'parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
+
+        // Generic host and path productions still require legal characters and complete escapes.
+        test('rejects malformed file hosts and percent triplets', () => {
+            const values = ['file://[::1/path', 'file://[not-ip]/path', 'file://host name/path', 'file://host%GG/path', 'file:///a%', 'file:///a%2', 'file:///a%GG', 'file:///a b', 'file:///path\\file'];
+            // Keep ordinary syntax failures distinct from the additional file-scheme restrictions.
+            for (const callback of ['isUri', 'isUriReference', 'isAbsoluteUri', 'isIri', 'isIriReference', 'isAbsoluteIri', 'parseUri', 'parseUriReference', 'parseAbsoluteUri', 'parseIri', 'parseIriReference', 'parseAbsoluteIri']) {
+                for (const value of values) assert.throws(() => id[callback](value), SyntaxError, callback + ': ' + value);
+            }
+        });
     });
 
     // Verify the RFC 8141 restrictions applied when generic URI/IRI syntax uses the urn scheme.
