@@ -20,7 +20,7 @@ The public suite contains **3,192 tests across 43 suites**. The concern entry po
 
 | Concern entry point | Coverage |
 | --- | --- |
-| [normalize](normalize/index.js) | Generic and scheme normalization, URI/IRI transformation, host mapping, non-mutation, idempotence, and [file/no-authority path-form stability](../../../normalization.md#path-form-preservation), including percent normalization before dot reduction. |
+| [normalize](normalize/index.js) | Generic and scheme normalization, URI/IRI transformation, host mapping, non-mutation, idempotence, and [file path-form stability](../../../normalization.md#file) and [generic no-authority path-form stability](../../../normalization.md#path-form-preservation), including percent normalization before dot reduction. |
 | [parse](parse/index.js) | URI/IRI component captures, Unicode, absent and empty components, and generic URN component boundaries. |
 | [resolve](resolve/index.js) | [Resolution boundaries](../../../readme.md#reference-resolution): upfront file query/userinfo/port/authority-path guards and post-calculation file path-prefix rejection, both string and parts returns, runtime object operands, empty versus null/undefined presence, and canonical raw authority. Valid hosted/bracketed file hosts, fragments, internal repeated slashes, generic and explicit non-file schemes, operation Errors, and base-first URN ordering are retained. |
 | [resolve-rfc](resolve-rfc/index.js) | RFC 3986 normal and abnormal resolution examples. |
